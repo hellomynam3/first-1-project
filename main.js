@@ -1,8 +1,10 @@
 import { renderDashboard } from './js/dashboard.js';
 import { renderSimulator } from './js/simulator.js';
 import { renderBeginner } from './js/beginner.js';
+import { renderSettings } from './js/settings.js';
 import { initChatbot } from './js/chatbot.js';
 import { renderStockDetail } from './js/stockDetail.js';
+import { appSettings, translations } from './js/store.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const contentArea = document.getElementById('content-area');
@@ -12,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const newsModal = document.getElementById('news-modal');
     const modalContent = document.getElementById('modal-news-content');
     const closeModal = document.querySelector('.close-modal');
+
+    // Initialize Theme
+    applyTheme();
 
     // Navigation Handler
     function loadView(viewName, param = null) {
@@ -35,14 +40,54 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'beginner':
                 renderBeginner(contentArea);
                 break;
+            case 'settings':
+                renderSettings(contentArea, handleSettingsUpdate);
+                break;
             case 'stock-detail':
-                // For detail view, we might not want to highlight any nav link or keep 'dashboard' active
                 navLinks.forEach(l => l.classList.remove('active'));
-                renderStockDetail(contentArea, param, () => loadView('dashboard')); // Param is symbol
+                renderStockDetail(contentArea, param, () => loadView('dashboard')); 
                 break;
             default:
                 renderDashboard(contentArea, handleStockClick, handleNewsClick);
         }
+        
+        updateNavText();
+    }
+
+    // --- Helpers ---
+
+    function applyTheme() {
+        if (appSettings.theme === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+        } else {
+            document.body.removeAttribute('data-theme');
+        }
+    }
+
+    function updateNavText() {
+        const t = translations[appSettings.lang];
+        // Ensure elements exist (Sidebar text update)
+        const navMap = {
+            'dashboard': t.nav_dashboard,
+            'simulator': t.nav_quant,
+            'beginner': t.nav_easy,
+            'settings': t.nav_settings
+        };
+        
+        navLinks.forEach(link => {
+            const view = link.dataset.view;
+            const span = link.querySelector('span');
+            if (span && navMap[view]) {
+                span.textContent = navMap[view];
+            }
+        });
+    }
+
+    function handleSettingsUpdate() {
+        applyTheme();
+        updateNavText();
+        // Re-render current settings view to reflect lang change immediately
+        renderSettings(contentArea, handleSettingsUpdate);
     }
 
     // --- Action Handlers ---
@@ -61,10 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
         modalContent.innerHTML = `
             <div style="margin-bottom: 20px;">
                 <span class="sentiment-badge ${news.sentiment}" style="font-size: 0.9rem;">${news.sentiment.toUpperCase()}</span>
-                <span style="color: #aaa; margin-left: 10px;">${news.source}</span>
+                <span style="color: var(--text-secondary); margin-left: 10px;">${news.source}</span>
             </div>
             <h2 style="margin-bottom: 20px; font-size: 1.8rem;">${news.title}</h2>
-            <p style="font-size: 1.1rem; line-height: 1.8; color: #ddd;">
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">
                 ${news.summary}
                 <br><br>
                 (Full article content would be fetched from the API here. For this demo, we are showing the extended summary.)
@@ -83,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         newsModal.classList.add('hidden');
     });
 
-    // Close on click outside
     window.addEventListener('click', (e) => {
         if (e.target === newsModal) {
             newsModal.classList.add('hidden');
@@ -99,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Init App
+    updateNavText(); // Initial text set
     loadView('dashboard');
     initChatbot();
 });

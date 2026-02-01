@@ -1,14 +1,30 @@
 :root {
+    /* Dark Mode (Default) */
     --bg-dark: #0f172a;
     --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
+    
     --accent-green: #10b981;
     --accent-red: #ef4444;
     --accent-blue: #3b82f6;
     --accent-yellow: #f59e0b;
+    
+    --card-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Light Mode Override */
+[data-theme="light"] {
+    --bg-dark: #f1f5f9;
+    --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    
+    --card-hover: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -23,6 +39,7 @@ body {
     color: var(--text-primary);
     height: 100vh;
     overflow: hidden;
+    transition: background 0.3s, color 0.3s;
 }
 
 .app-container {
@@ -37,7 +54,8 @@ body {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    transition: background 0.3s, border 0.3s;
 }
 
 /* Sidebar */
@@ -195,11 +213,11 @@ body {
 
 .stock-card:hover {
     transform: translateY(-4px);
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--card-hover);
 }
 
 .stock-badge {
-    background: rgba(255,255,255,0.1);
+    background: rgba(125, 125, 125, 0.2);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.8rem;
@@ -213,7 +231,7 @@ body {
 }
 
 .chip {
-    background: rgba(0,0,0,0.3);
+    background: rgba(125, 125, 125, 0.15);
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -268,13 +286,13 @@ body {
 }
 
 .metric-item {
-    background: rgba(0,0,0,0.2);
+    background: rgba(125, 125, 125, 0.1);
     padding: 10px;
     border-radius: 8px;
     text-align: center;
 }
 
-.metric-label { font-size: 0.8rem; color: #aaa; }
+.metric-label { font-size: 0.8rem; color: var(--text-secondary); }
 .metric-val { font-size: 1.1rem; font-weight: bold; }
 
 /* Chatbot */
@@ -323,7 +341,8 @@ body {
 
 .chat-header {
     padding: 16px;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -344,6 +363,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background: var(--glass-bg);
 }
 
 .message {
@@ -356,8 +376,9 @@ body {
 
 .message.bot {
     align-self: flex-start;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(125, 125, 125, 0.1);
     border-bottom-left-radius: 2px;
+    color: var(--text-primary);
 }
 
 .message.user {
@@ -372,15 +393,16 @@ body {
     display: flex;
     gap: 8px;
     border-top: 1px solid var(--glass-border);
+    background: var(--glass-bg);
 }
 
 .chat-input input {
     flex: 1;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(125, 125, 125, 0.1);
     border: 1px solid var(--glass-border);
     padding: 8px 12px;
     border-radius: 20px;
-    color: white;
+    color: var(--text-primary);
     outline: none;
 }
 
@@ -406,11 +428,12 @@ body {
     padding: 16px;
     margin: 16px 0;
     border-radius: 0 8px 8px 0;
+    color: var(--text-primary);
 }
 
 .progress-bar-container {
     height: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(125, 125, 125, 0.2);
     border-radius: 10px;
     margin-top: 8px;
     position: relative;
@@ -427,11 +450,11 @@ body {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: white;
-    box-shadow: 0 0 5px white;
+    background: var(--text-primary);
+    box-shadow: 0 0 5px var(--text-primary);
 }
 
-/* Modal Styles (RESTORED) */
+/* Modal Styles */
 .modal {
     position: fixed;
     z-index: 2000;
@@ -452,6 +475,7 @@ body {
 
 .modal-content {
     background: var(--bg-dark);
+    color: var(--text-primary);
     padding: 30px;
     border: 1px solid var(--glass-border);
     width: 80%;
@@ -467,17 +491,17 @@ body {
     position: absolute;
     top: 15px;
     right: 20px;
-    color: #aaa;
+    color: var(--text-secondary);
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
 }
 
 .close-modal:hover {
-    color: white;
+    color: var(--text-primary);
 }
 
-/* Stock Detail View (RESTORED) */
+/* Stock Detail View */
 .detail-header {
     display: flex;
     justify-content: space-between;
@@ -518,8 +542,49 @@ body {
     display: inline-block;
     padding: 4px 8px;
     border-radius: 4px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(125, 125, 125, 0.15);
     font-size: 0.8rem;
     margin-right: 5px;
-    color: #ddd;
+    color: var(--text-secondary);
+}
+
+/* Settings Page */
+.settings-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.toggle-switch {
+    display: flex;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+    padding: 4px;
+    border-radius: 20px;
+}
+
+.toggle-btn {
+    padding: 6px 16px;
+    border-radius: 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }

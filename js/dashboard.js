@@ -1,16 +1,18 @@
-import { stocks, news } from './store.js';
+import { stocks, news, appSettings, translations } from './store.js';
 import { getMarketStatus, formatCurrency } from './utils.js';
 import { generateHistory } from './math.js';
 
 export function renderDashboard(container, onStockClick, onNewsClick) {
+    const t = translations[appSettings.lang];
+
     container.innerHTML = `
         <div class="dashboard-header-grid">
             <div class="section-column">
-                <div class="section-title"><i class="fa-solid fa-chart-simple"></i> Major Indices</div>
+                <div class="section-title"><i class="fa-solid fa-chart-simple"></i> ${t.indices}</div>
                 <div class="dashboard-grid" id="mini-indices"></div>
             </div>
             <div class="section-column">
-                <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Sector Performance</div>
+                <div class="section-title"><i class="fa-solid fa-chart-pie"></i> ${t.sectors}</div>
                 <div class="glass-panel sector-panel" id="sector-performance">
                     <!-- JS Injected -->
                 </div>
@@ -18,12 +20,12 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
         </div>
         
         <div class="section-title" style="margin-top:20px;">
-            <i class="fa-solid fa-fire"></i> Your Watchlist
+            <i class="fa-solid fa-fire"></i> ${t.watchlist}
         </div>
         <div class="watchlist-grid" id="watchlist"></div>
 
         <div class="section-title">
-            <i class="fa-regular fa-newspaper"></i> AI Sentiment News
+            <i class="fa-regular fa-newspaper"></i> ${t.news}
         </div>
         <div class="news-section" id="news-feed"></div>
     `;
@@ -36,11 +38,13 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
 }
 
 function updateMarketStatus() {
+    const t = translations[appSettings.lang];
     const statusEl = document.getElementById('market-status');
-    const { status, message } = getMarketStatus();
+    const { status } = getMarketStatus();
     const dotClass = status === 'OPEN' ? 'status-open' : 'status-closed';
+    const msg = status === 'OPEN' ? t.market_open : t.market_closed;
     
-    statusEl.innerHTML = `<span class="status-dot ${dotClass}"></span> ${message}`;
+    statusEl.innerHTML = `<span class="status-dot ${dotClass}"></span> ${msg}`;
 }
 
 function renderIndices() {
@@ -74,6 +78,7 @@ function renderIndices() {
 
 function renderSectors() {
     const container = document.getElementById('sector-performance');
+    // For full translation, sector names should also be in dictionary, keeping EN for now as demo
     const sectors = [
         { name: 'Technology', change: 1.2 },
         { name: 'Financial', change: -0.5 },
@@ -95,8 +100,8 @@ function renderSectors() {
         row.style.fontSize = '0.9rem';
 
         row.innerHTML = `
-            <div style="width:100px; color:#ccc;">${sec.name}</div>
-            <div style="flex:1; background:rgba(255,255,255,0.05); height:8px; border-radius:4px; overflow:hidden;">
+            <div style="width:100px; color:var(--text-secondary);">${sec.name}</div>
+            <div style="flex:1; background:rgba(125,125,125,0.2); height:8px; border-radius:4px; overflow:hidden;">
                 <div style="width:${width}%; height:100%; background:${color};"></div>
             </div>
             <div style="width:50px; text-align:right; color:${color};">${sec.change > 0 ? '+' : ''}${sec.change}%</div>
@@ -106,6 +111,7 @@ function renderSectors() {
 }
 
 function renderWatchlist(onStockClick) {
+    const t = translations[appSettings.lang];
     const container = document.getElementById('watchlist');
     const myStocks = stocks.filter(s => !s.type);
 
@@ -121,21 +127,20 @@ function renderWatchlist(onStockClick) {
                 <span class="stock-badge">${s.symbol}</span>
                 <span class="${colorClass}" style="font-weight:bold;">${isUp ? '+' : ''}${s.change}%</span>
             </div>
-            <div style="font-size:0.85rem; color:#aaa; margin-bottom:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                 ${s.name}
             </div>
             <div style="font-size:1.8rem; font-weight:bold; margin-bottom:10px;">$${s.price.toFixed(2)}</div>
             
             <div class="info-chips">
-                <div class="chip">MCap: ${formatCurrency(s.marketCap)}</div>
-                <div class="chip">PER: ${s.peRatio}</div>
+                <div class="chip">${t.mcap}: ${formatCurrency(s.marketCap)}</div>
+                <div class="chip">${t.per}: ${s.peRatio}</div>
             </div>
-            <div style="margin-top:10px; font-size:0.8rem; color:#888;">
-                Analyst: <span class="${ratingColor}">${s.analystRating}</span>
+            <div style="margin-top:10px; font-size:0.8rem; color:var(--text-secondary);">
+                ${t.rating}: <span class="${ratingColor}">${s.analystRating}</span>
             </div>
         `;
         
-        // Add Click Listener
         card.addEventListener('click', () => {
             if (onStockClick) onStockClick(s.symbol);
         });
@@ -149,17 +154,16 @@ function renderNews(onNewsClick) {
     news.forEach(n => {
         const card = document.createElement('div');
         card.className = `glass-panel news-card ${n.sentiment}`;
-        card.style.cursor = 'pointer'; // Make it look clickable
+        card.style.cursor = 'pointer';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span style="font-size:0.75rem; color:#aaa; text-transform:uppercase;">${n.source}</span>
+                <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">${n.source}</span>
                 <span class="sentiment-badge ${n.sentiment}">${n.sentiment.toUpperCase()}</span>
             </div>
             <div style="font-weight:bold; font-size:1rem; margin-bottom:5px;">${n.title}</div>
-            <div style="font-size:0.85rem; color:#ccc; line-height:1.4;">${n.summary}</div>
+            <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">${n.summary}</div>
         `;
 
-        // Add Click Listener
         card.addEventListener('click', () => {
             if (onNewsClick) onNewsClick(n);
         });
