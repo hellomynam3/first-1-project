@@ -4,9 +4,10 @@ import { renderBeginner } from './js/beginner.js';
 import { renderSettings } from './js/settings.js';
 import { initChatbot } from './js/chatbot.js';
 import { renderStockDetail } from './js/stockDetail.js';
-import { appSettings, translations, stocks } from './js/store.js'; // Import stocks for search
+import { appSettings, translations, stocks, initializeStore } from './js/store.js';
+import { fetchMarketData } from './js/api.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const contentArea = document.getElementById('content-area');
     const navLinks = document.querySelectorAll('.nav-links li');
     
@@ -19,21 +20,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('global-search');
     const searchResults = document.getElementById('search-results');
 
-    // Initialize Theme
+    // 1. Fetch Data First
+    contentArea.innerHTML = '<div style="text-align:center; padding-top:50px;">Loading Market Data...</div>';
+    const data = await fetchMarketData();
+    initializeStore(data);
+
+    // 2. Initialize Theme
     applyTheme();
 
     // Navigation Handler
     function loadView(viewName, param = null) {
-        // Update Active State
         navLinks.forEach(link => {
             if (link.dataset.view === viewName) link.classList.add('active');
             else link.classList.remove('active');
         });
 
-        // Clear Content
         contentArea.innerHTML = '';
 
-        // Load Module
         switch(viewName) {
             case 'dashboard':
                 renderDashboard(contentArea, handleStockClick, handleNewsClick);
@@ -61,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Search Logic ---
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase().trim();
-        
         if (query.length === 0) {
             searchResults.classList.add('hidden');
             return;
@@ -84,11 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
             searchResults.classList.remove('hidden');
 
-            // Attach click events
             searchResults.querySelectorAll('.search-item').forEach(item => {
                 item.addEventListener('click', () => {
                     handleStockClick(item.dataset.symbol);
-                    searchInput.value = ''; // Clear input
+                    searchInput.value = '';
                     searchResults.classList.add('hidden');
                 });
             });
@@ -98,16 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Close search when clicking outside
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
             searchResults.classList.add('hidden');
         }
     });
 
-
     // --- Helpers ---
-
     function applyTheme() {
         if (appSettings.theme === 'light') {
             document.body.setAttribute('data-theme', 'light');
@@ -118,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateNavText() {
         const t = translations[appSettings.lang];
-        // Ensure elements exist (Sidebar text update)
         const navMap = {
             'dashboard': t.nav_dashboard,
             'simulator': t.nav_quant,
@@ -138,11 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleSettingsUpdate() {
         applyTheme();
         updateNavText();
-        // Re-render current settings view to reflect lang change immediately
         renderSettings(contentArea, handleSettingsUpdate);
     }
-
-    // --- Action Handlers ---
 
     function handleStockClick(symbol) {
         loadView('stock-detail', symbol);
@@ -151,8 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleNewsClick(newsItem) {
         showNewsModal(newsItem);
     }
-
-    // --- Modal Logic ---
 
     function showNewsModal(news) {
         modalContent.innerHTML = `
@@ -164,10 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">
                 ${news.summary}
                 <br><br>
-                (Full article content would be fetched from the API here. For this demo, we are showing the extended summary.)
-                <br><br>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                (Full article content would be fetched from the API here.)
             </p>
             <button style="margin-top: 30px; padding: 10px 20px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer;">
                 Read Full Article <i class="fa-solid fa-external-link-alt"></i>
@@ -176,17 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
         newsModal.classList.remove('hidden');
     }
 
-    closeModal.addEventListener('click', () => {
-        newsModal.classList.add('hidden');
-    });
+    closeModal.addEventListener('click', () => newsModal.classList.add('hidden'));
+    window.addEventListener('click', (e) => { if (e.target === newsModal) newsModal.classList.add('hidden'); });
 
-    window.addEventListener('click', (e) => {
-        if (e.target === newsModal) {
-            newsModal.classList.add('hidden');
-        }
-    });
-
-    // Attach Click Events to Nav
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             const view = link.dataset.view;
@@ -194,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Init App
-    updateNavText(); // Initial text set
+    // Final Init
+    updateNavText();
     loadView('dashboard');
     initChatbot();
 });
