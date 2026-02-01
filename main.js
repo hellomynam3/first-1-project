@@ -4,7 +4,7 @@ import { renderBeginner } from './js/beginner.js';
 import { renderSettings } from './js/settings.js';
 import { initChatbot } from './js/chatbot.js';
 import { renderStockDetail } from './js/stockDetail.js';
-import { appSettings, translations } from './js/store.js';
+import { appSettings, translations, stocks } from './js/store.js'; // Import stocks for search
 
 document.addEventListener('DOMContentLoaded', () => {
     const contentArea = document.getElementById('content-area');
@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const newsModal = document.getElementById('news-modal');
     const modalContent = document.getElementById('modal-news-content');
     const closeModal = document.querySelector('.close-modal');
+
+    // Search Elements
+    const searchInput = document.getElementById('global-search');
+    const searchResults = document.getElementById('search-results');
 
     // Initialize Theme
     applyTheme();
@@ -53,6 +57,54 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateNavText();
     }
+
+    // --- Search Logic ---
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        
+        if (query.length === 0) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        const matches = stocks.filter(s => 
+            s.symbol.toLowerCase().includes(query) || 
+            s.name.toLowerCase().includes(query)
+        );
+
+        if (matches.length > 0) {
+            searchResults.innerHTML = matches.map(s => `
+                <div class="search-item" data-symbol="${s.symbol}">
+                    <div>
+                        <span class="search-symbol">${s.symbol}</span>
+                        <span class="search-name">${s.name}</span>
+                    </div>
+                    <div class="search-price">$${s.price}</div>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+
+            // Attach click events
+            searchResults.querySelectorAll('.search-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    handleStockClick(item.dataset.symbol);
+                    searchInput.value = ''; // Clear input
+                    searchResults.classList.add('hidden');
+                });
+            });
+        } else {
+            searchResults.innerHTML = `<div class="search-item" style="cursor:default; color:#aaa;">No results found</div>`;
+            searchResults.classList.remove('hidden');
+        }
+    });
+
+    // Close search when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+
 
     // --- Helpers ---
 
