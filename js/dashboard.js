@@ -2,7 +2,7 @@ import { stocks, news } from './store.js';
 import { getMarketStatus, formatCurrency } from './utils.js';
 import { generateHistory } from './math.js';
 
-export function renderDashboard(container) {
+export function renderDashboard(container, onStockClick, onNewsClick) {
     container.innerHTML = `
         <div class="dashboard-header-grid">
             <div class="section-column">
@@ -31,8 +31,8 @@ export function renderDashboard(container) {
     updateMarketStatus();
     renderIndices();
     renderSectors();
-    renderWatchlist();
-    renderNews();
+    renderWatchlist(onStockClick);
+    renderNews(onNewsClick);
 }
 
 function updateMarketStatus() {
@@ -74,7 +74,6 @@ function renderIndices() {
 
 function renderSectors() {
     const container = document.getElementById('sector-performance');
-    // Mock sector performance derived from stocks or static
     const sectors = [
         { name: 'Technology', change: 1.2 },
         { name: 'Financial', change: -0.5 },
@@ -86,7 +85,7 @@ function renderSectors() {
     sectors.forEach(sec => {
         const isUp = sec.change >= 0;
         const color = isUp ? 'var(--accent-green)' : 'var(--accent-red)';
-        const width = Math.abs(sec.change) * 20 + 10; // Scale for visual
+        const width = Math.abs(sec.change) * 20 + 10;
         
         const row = document.createElement('div');
         row.className = 'sector-row';
@@ -106,7 +105,7 @@ function renderSectors() {
     });
 }
 
-function renderWatchlist() {
+function renderWatchlist(onStockClick) {
     const container = document.getElementById('watchlist');
     const myStocks = stocks.filter(s => !s.type);
 
@@ -135,15 +134,22 @@ function renderWatchlist() {
                 Analyst: <span class="${ratingColor}">${s.analystRating}</span>
             </div>
         `;
+        
+        // Add Click Listener
+        card.addEventListener('click', () => {
+            if (onStockClick) onStockClick(s.symbol);
+        });
+
         container.appendChild(card);
     });
 }
 
-function renderNews() {
+function renderNews(onNewsClick) {
     const container = document.getElementById('news-feed');
     news.forEach(n => {
         const card = document.createElement('div');
         card.className = `glass-panel news-card ${n.sentiment}`;
+        card.style.cursor = 'pointer'; // Make it look clickable
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                 <span style="font-size:0.75rem; color:#aaa; text-transform:uppercase;">${n.source}</span>
@@ -152,6 +158,12 @@ function renderNews() {
             <div style="font-weight:bold; font-size:1rem; margin-bottom:5px;">${n.title}</div>
             <div style="font-size:0.85rem; color:#ccc; line-height:1.4;">${n.summary}</div>
         `;
+
+        // Add Click Listener
+        card.addEventListener('click', () => {
+            if (onNewsClick) onNewsClick(n);
+        });
+
         container.appendChild(card);
     });
 }
