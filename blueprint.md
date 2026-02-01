@@ -1,30 +1,46 @@
-# Stock Market Dashboard Blueprint
+# Stock AI Master V2 Blueprint
 
 ## Overview
-A real-time stock market dashboard providing an overview of major market indices and popular stock prices. It features a modern, responsive design with a dark theme and simulated real-time data updates.
+A comprehensive stock analysis platform featuring a real-time dashboard and deep-dive analytical tools. The application uses a "Sidebar + Main Content" layout to provide quick access to market trends and detailed stock reports.
 
-## Current Plan: Initial Implementation
+## Features
 
-### 1. Structure (HTML)
-- **Header**: Application title and current status.
-- **Market Indices Section**: Display key indices (KOSPI, KOSDAQ, NASDAQ, S&P 500).
-- **Popular Stocks Section**: Grid of cards displaying major stocks (Samsung Electronics, Apple, Tesla, etc.).
-- **Web Components**: Use `<market-ticker>` and `<stock-card>` for reusable UI elements.
+### 1. Navigation & UX (Sidebar)
+- **Home Access**: "Stock AI Master V2" logo/button to return to the dashboard.
+- **My Watchlist**: Categorized buttons for quick access to specific sector leaders.
+  - Sectors: Aerospace, AI/Semicon, EV, Domestic Leaders.
+  - Action: Clicking a ticker switches to the **Deep Analysis** view.
 
-### 2. Styling (CSS)
-- **Theme**: Dark mode with a professional financial look.
-- **Colors**:
-  - Background: Deep dark blues/grays.
-  - Text: White/Light Gray.
-  - Trends: **Red for Up**, **Blue for Down** (Korean market convention).
-- **Layout**: CSS Grid and Flexbox for responsiveness.
-- **Effects**: Soft shadows, rounded corners, and subtle animations on price updates.
+### 2. Market Dashboard (Home View)
+- **Key Indices Cards**:
+  - Targets: S&P 500, NASDAQ, Bitcoin, KRW/USD.
+  - Content: Price, Change %, and a **Sparkline (Mini-chart)** for 5-day trend.
+- **Trending Stocks**:
+  - Curated list of hot stocks (NVDA, TSLA, etc.).
+  - "Analyze" button to open the deep dive view.
 
-### 3. Logic (JavaScript)
-- **Mock Data**: A predefined list of indices and stocks with base prices.
-- **Simulation Engine**: A function that randomly adjusts prices by small percentages every few seconds to mimic market volatility.
-- **State Management**: Simple reactivity to update the DOM efficiently when data changes.
-- **Components**: Custom Elements implementation for modular code.
+### 3. Deep Analysis (Detail View)
+A tabbed interface for comprehensive stock data.
 
-## History
-- **Initial Setup**: Project initialized.
+- **Tab 1: 📈 Advanced Chart**
+  - **Candlestick Chart**: OHLC data.
+  - **Overlays**: 20-day (Orange) and 60-day (Blue) Moving Averages.
+  - **Volume**: Color-coded bars (Red/Green).
+- **Tab 2: ⚖️ Peer Comparison**
+  - Feature: Compare current stock vs. competitor (e.g., NVDA vs. AMD).
+  - Visualization: 1-Year Normalized Return (%) Line Chart.
+- **Tab 3: 💰 Financials**
+  - **Cards**: Market Cap, PER, Revenue.
+  - **Analyst Gauge**: Buy/Hold/Sell progress bar & Target Price gap.
+- **Tab 4: 🗞️ AI News**
+  - **Sentiment Analysis**: Auto-tagging news as "Positive" (Green) or "Negative" (Red) based on keywords (surge, drop, risk, record).
+- **Tab 5: 🚀 Simulator (DCA)**
+  - **Input**: Investment Duration, Monthly Amount.
+  - **Output**: Total Invested, Final Value, Yield %.
+  - **Chart**: Asset growth over time.
+
+## Technical Architecture
+- **Library**: **ApexCharts** (via CDN) for high-performance financial charting.
+- **State Management**: Simple vanilla JS router (`currentView` state).
+- **Data**: Advanced mock data generator for historical OHLC prices to support charts and simulations.
+- **Styling**: CSS Grid/Flexbox, Dark Mode, Glassmorphism.

@@ -3,43 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Market Live</title>
+    <title>Stock AI Master V2</title>
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="main.js"></script>
-    <!-- Google Fonts for a modern look -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- ApexCharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script type="module" src="main.js"></script>
 </head>
 <body>
 
-    <header class="app-header">
-        <div class="header-content">
-            <h1><span class="icon">📈</span> Market Watch</h1>
-            <div class="status-indicator">
-                <span class="dot"></span>
-                <span class="text">실시간 장운영중</span>
+    <div class="app-container">
+        <!-- 1. Sidebar -->
+        <aside class="sidebar">
+            <div class="brand" id="home-btn">
+                <span class="icon">🤖</span>
+                <span class="text">Stock AI Master <span class="version">V2</span></span>
             </div>
-        </div>
-    </header>
 
-    <main>
-        <!-- Market Indices Section -->
-        <section class="market-indices">
-            <h2>주요 지수</h2>
-            <div class="indices-grid" id="indices-container">
-                <!-- <market-index> components will be injected here -->
-            </div>
-        </section>
+            <nav class="watchlist-nav">
+                <h3>My Watchlist</h3>
+                
+                <div class="sector-group">
+                    <h4>🚀 Aerospace</h4>
+                    <button class="ticker-btn" data-ticker="RKLB">RKLB</button>
+                    <button class="ticker-btn" data-ticker="SPCE">SPCE</button>
+                </div>
 
-        <!-- Popular Stocks Section -->
-        <section class="popular-stocks">
-            <h2>인기 종목</h2>
-            <div class="stocks-grid" id="stocks-container">
-                <!-- <stock-card> components will be injected here -->
+                <div class="sector-group">
+                    <h4>💎 AI / Semi</h4>
+                    <button class="ticker-btn" data-ticker="NVDA">NVDA</button>
+                    <button class="ticker-btn" data-ticker="AMD">AMD</button>
+                    <button class="ticker-btn" data-ticker="PLTR">PLTR</button>
+                </div>
+
+                <div class="sector-group">
+                    <h4>⚡ EV</h4>
+                    <button class="ticker-btn" data-ticker="TSLA">TSLA</button>
+                    <button class="ticker-btn" data-ticker="RIVN">RIVN</button>
+                </div>
+
+                <div class="sector-group">
+                    <h4>🇰🇷 K-Leaders</h4>
+                    <button class="ticker-btn" data-ticker="005930">삼성전자</button>
+                    <button class="ticker-btn" data-ticker="000660">SK하이닉스</button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- HEADER -->
+            <header class="top-bar">
+                <h2 id="page-title">Market Dashboard</h2>
+                <div class="search-bar">
+                    <input type="text" id="global-search" placeholder="종목 검색 (Ticker/Name)...">
+                </div>
+                <div class="status-indicator">
+                    <span class="dot"></span>
+                    <span class="text">LIVE</span>
+                </div>
+            </header>
+
+            <!-- VIEW 1: DASHBOARD -->
+            <div id="dashboard-view" class="view active">
+                <section class="indices-section">
+                    <h3>Major Indices</h3>
+                    <div class="indices-grid" id="indices-container">
+                        <!-- Cards injected by JS -->
+                    </div>
+                </section>
+
+                <section class="trending-section">
+                    <h3>🔥 Trending Stocks</h3>
+                    <div class="stocks-grid" id="trending-container">
+                        <!-- Stock cards injected by JS -->
+                    </div>
+                </section>
             </div>
-        </section>
-    </main>
+
+            <!-- VIEW 2: DEEP ANALYSIS -->
+            <div id="analysis-view" class="view hidden">
+                <div class="stock-header">
+                    <div class="stock-info-left">
+                        <h1 id="analysis-name">NVIDIA</h1>
+                        <span id="analysis-ticker" class="badge">NVDA</span>
+                    </div>
+                    <div class="stock-price-right">
+                        <div id="analysis-price" class="big-price">$820.40</div>
+                        <div id="analysis-change" class="price-change text-up">+2.51%</div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="chart">📈 Chart</button>
+                    <button class="tab-btn" data-tab="compare">⚖️ Compare</button>
+                    <button class="tab-btn" data-tab="financials">💰 Financials</button>
+                    <button class="tab-btn" data-tab="news">🗞️ AI News</button>
+                    <button class="tab-btn" data-tab="simulator">🚀 Simulator</button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content">
+                    
+                    <!-- Tab 1: Advanced Chart -->
+                    <div id="tab-chart" class="tab-pane active">
+                        <div class="chart-container-box">
+                            <div id="main-candlestick-chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Comparison -->
+                    <div id="tab-compare" class="tab-pane">
+                        <div class="input-group">
+                            <label>Compare with:</label>
+                            <input type="text" id="compare-ticker-input" value="AMD">
+                            <button id="run-compare-btn">VS</button>
+                        </div>
+                        <div class="chart-container-box">
+                            <div id="comparison-chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Financials -->
+                    <div id="tab-financials" class="tab-pane">
+                        <div class="financial-cards">
+                            <div class="f-card">
+                                <h5>Market Cap</h5>
+                                <span id="fin-mkt-cap">$2.1T</span>
+                            </div>
+                            <div class="f-card">
+                                <h5>PER (TTM)</h5>
+                                <span id="fin-per">75.4</span>
+                            </div>
+                            <div class="f-card">
+                                <h5>Revenue (YoY)</h5>
+                                <span id="fin-rev" class="text-up">+265%</span>
+                            </div>
+                        </div>
+                        <div class="analyst-section">
+                            <h4>Analyst Consensus</h4>
+                            <div class="gauge-wrapper">
+                                <div class="gauge-labels">
+                                    <span>Sell</span>
+                                    <span>Hold</span>
+                                    <span>Buy</span>
+                                </div>
+                                <div class="gauge-bar">
+                                    <div class="fill" style="width: 85%;"></div> <!-- Mock value -->
+                                </div>
+                                <div class="target-price-info">
+                                    Target: <span id="fin-target">$950.00</span> (Upside: +15%)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: News -->
+                    <div id="tab-news" class="tab-pane">
+                        <div id="news-feed" class="news-list">
+                            <!-- News items injected JS -->
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: Simulator -->
+                    <div id="tab-simulator" class="tab-pane">
+                        <div class="sim-controls">
+                            <div class="control-group">
+                                <label>Monthly Investment ($)</label>
+                                <input type="number" id="sim-amount" value="500">
+                            </div>
+                            <div class="control-group">
+                                <label>Duration (Years)</label>
+                                <select id="sim-duration">
+                                    <option value="1">1 Year</option>
+                                    <option value="3" selected>3 Years</option>
+                                    <option value="5">5 Years</option>
+                                </select>
+                            </div>
+                            <button id="run-sim-btn">Run Simulation</button>
+                        </div>
+                        <div class="sim-results">
+                            <div class="res-box">
+                                <small>Total Invested</small>
+                                <span id="sim-invested">$18,000</span>
+                            </div>
+                            <div class="res-box">
+                                <small>Final Value</small>
+                                <span id="sim-final" class="text-up">$45,200</span>
+                            </div>
+                            <div class="res-box">
+                                <small>Yield</small>
+                                <span id="sim-yield" class="text-up">+151%</span>
+                            </div>
+                        </div>
+                        <div class="chart-container-box">
+                            <div id="simulator-chart"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
 
 </body>
 </html>
