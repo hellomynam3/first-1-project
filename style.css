@@ -311,6 +311,24 @@ body {
     border-radius: 4px;
     font-size: 0.8rem;
     font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.live-pulse {
+    background: var(--accent-red);
+    color: white;
+    font-size: 0.6rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 .info-chips {

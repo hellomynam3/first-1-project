@@ -124,7 +124,7 @@ function renderWatchlist(onStockClick) {
         card.className = 'glass-panel stock-card';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span class="stock-badge">${s.symbol}</span>
+                <span class="stock-badge">${s.symbol} ${s.isLive ? '<span class="live-pulse">LIVE</span>' : ''}</span>
                 <span class="${colorClass}" style="font-weight:bold;">${isUp ? '+' : ''}${s.change}%</span>
             </div>
             <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">

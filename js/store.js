@@ -30,6 +30,8 @@ export const translations = {
         settings_title: "Preferences",
         theme_label: "App Theme",
         lang_label: "Language",
+        apikey_label: "Finnhub API Key",
+        apikey_desc: "Get a free key at finnhub.io",
         btn_save: "Save Settings",
         mcap: "MCap",
         per: "P/E",
@@ -59,6 +61,8 @@ export const translations = {
         settings_title: "환경 설정",
         theme_label: "앱 테마",
         lang_label: "언어 설정",
+        apikey_label: "Finnhub API 키",
+        apikey_desc: "finnhub.io에서 무료 키를 발급받으세요",
         btn_save: "설정 저장",
         mcap: "시총",
         per: "PER",
@@ -73,11 +77,15 @@ export const translations = {
 
 export let appSettings = {
     theme: localStorage.getItem('theme') || 'dark',
-    lang: localStorage.getItem('lang') || 'en'
+    lang: localStorage.getItem('lang') || 'en',
+    finnhubKey: localStorage.getItem('finnhubKey') || ''
 };
 
 export function saveSettings(newSettings) {
     appSettings = { ...appSettings, ...newSettings };
     localStorage.setItem('theme', appSettings.theme);
     localStorage.setItem('lang', appSettings.lang);
+    if (newSettings.finnhubKey !== undefined) {
+        localStorage.setItem('finnhubKey', appSettings.finnhubKey);
+    }
 }

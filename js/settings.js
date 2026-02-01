@@ -27,28 +27,46 @@ export function renderSettings(container, onUpdate) {
                 </div>
             </div>
 
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div style="font-size: 1.1rem;">
+                    <i class="fa-solid fa-key"></i> ${t.apikey_label}
+                </div>
+                <div style="width: 100%;">
+                    <input type="text" id="api-key-input" value="${appSettings.finnhubKey}" placeholder="Paste your API key here..." 
+                           style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; outline: none;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+                        ${t.apikey_desc}
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button id="save-settings-btn" style="width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    ${t.btn_save}
+                </button>
+            </div>
+
             <div style="margin-top: 30px; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
-                Stock AI Master v1.2.0
+                Stock AI Master v1.3.0 (Live API Ready)
             </div>
         </div>
     `;
 
-    // Event Listeners
+    // Toggle Buttons
     container.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             const type = btn.dataset.type;
             const val = btn.dataset.val;
-            
-            // Visual Update
-            container.querySelectorAll(`[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Save & Trigger
-            const newSettings = {};
-            newSettings[type] = val;
-            saveSettings(newSettings);
-            
+            saveSettings({ [type]: val });
             if (onUpdate) onUpdate();
         });
+    });
+
+    // Save Button
+    document.getElementById('save-settings-btn').addEventListener('click', () => {
+        const key = document.getElementById('api-key-input').value.trim();
+        saveSettings({ finnhubKey: key });
+        alert(appSettings.lang === 'ko' ? "설정이 저장되었습니다. 데이터를 새로 고침합니다." : "Settings saved. Refreshing data...");
+        location.reload(); // Refresh to fetch new live data
     });
 }
