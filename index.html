@@ -3,135 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock AI Pro</title>
+    <title>Market Command Center</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script type="module" src="main.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <div class="app-container">
-        
-        <!-- 1. Ticker Tape -->
-        <div class="ticker-tape">
-            <div class="ticker-wrap" id="ticker-wrap">
-                <!-- Injected via JS -->
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass-panel">
+            <div class="logo">
+                <i class="fa-solid fa-layer-group"></i> MCC
             </div>
-        </div>
+            <ul class="nav-links">
+                <li class="active" data-view="dashboard">
+                    <i class="fa-solid fa-house"></i> <span>Dashboard</span>
+                </li>
+                <li data-view="simulator">
+                    <i class="fa-solid fa-chart-line"></i> <span>Quant Tool</span>
+                </li>
+                <li data-view="beginner">
+                    <i class="fa-solid fa-seedling"></i> <span>Easy Mode</span>
+                </li>
+            </ul>
+        </nav>
 
-        <!-- 2. Header -->
-        <header class="app-header">
-            <div class="brand">
-                <span style="color: #2962ff; font-size:20px;">■</span> Stock AI Pro
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-bar glass-panel">
+                <div class="market-status" id="market-status">
+                    <!-- JS will populate this -->
+                    <span class="status-dot"></span> Loading Market Status...
+                </div>
+                <div class="user-profile">
+                    <i class="fa-solid fa-circle-user"></i>
+                </div>
+            </header>
+
+            <div id="content-area" class="content-area">
+                <!-- Dynamic Content Loaded Here -->
             </div>
-            <div class="search-container">
-                <input type="text" id="global-search" placeholder="Search Symbol (e.g. BTC, NVDA)...">
+        </main>
+
+        <!-- AI Chatbot Floating Button -->
+        <div class="chatbot-container" id="chatbot-container">
+            <div class="chat-window glass-panel hidden" id="chat-window">
+                <div class="chat-header">
+                    <span>AI Assistant</span>
+                    <button id="close-chat"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot">Hello! I'm your AI Analyst. Ask me about PER, RSI, or market trends.</div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input-field" placeholder="Ask a question...">
+                    <button id="send-chat"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
             </div>
-            <div style="font-family: monospace; font-size: 12px; color: #089981;">
-                ● Connected
-            </div>
-        </header>
-
-        <!-- 3. Main Workspace -->
-        <div class="main-workspace">
-            
-            <!-- LEFT: Watchlist -->
-            <aside class="sidebar-left">
-                <div class="panel-header">
-                    <span>Watchlist</span>
-                    <span style="font-size:12px;">+</span>
-                </div>
-                <div class="watchlist-content" id="watchlist-container">
-                    <!-- JS Injection -->
-                </div>
-            </aside>
-
-            <!-- CENTER: Chart & Analysis -->
-            <main class="center-panel">
-                <div class="chart-header">
-                    <div class="symbol-row">
-                        <span class="main-symbol" id="main-symbol">BTC/USD</span>
-                        <span class="main-price" id="main-price">65,432.10</span>
-                        <span class="main-change bg-up text-up" id="main-change">+2.45%</span>
-                    </div>
-                    <div class="stats-row">
-                        <div class="stat-item">Open <span id="stat-open">64,000</span></div>
-                        <div class="stat-item">High <span id="stat-high">66,000</span></div>
-                        <div class="stat-item">Low <span id="stat-low">63,500</span></div>
-                        <div class="stat-item">Vol <span id="stat-vol">45.2K</span></div>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div id="pro-candlestick-chart" style="height: 100%;"></div>
-                </div>
-
-                <div class="tabs-bar">
-                    <div class="tab-link active" data-tab="financials">Financials</div>
-                    <div class="tab-link" data-tab="news">News Feed</div>
-                    <div class="tab-link" data-tab="technicals">Technicals</div>
-                </div>
-
-                <div class="tab-content-area">
-                    <div id="tab-financials" class="tab-pane active">
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
-                            <div style="background: #1e222d; padding: 16px; border-radius: 4px;">
-                                <div style="color:#787b86; font-size:11px;">Market Cap</div>
-                                <div style="font-size:16px; font-weight:700; margin-top:4px;">$1.2T</div>
-                            </div>
-                            <div style="background: #1e222d; padding: 16px; border-radius: 4px;">
-                                <div style="color:#787b86; font-size:11px;">Volume (24h)</div>
-                                <div style="font-size:16px; font-weight:700; margin-top:4px;">$42B</div>
-                            </div>
-                            <div style="background: #1e222d; padding: 16px; border-radius: 4px;">
-                                <div style="color:#787b86; font-size:11px;">Circulating Supply</div>
-                                <div style="font-size:16px; font-weight:700; margin-top:4px;">19M</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="tab-news" class="tab-pane">
-                        <div id="news-container"></div>
-                    </div>
-                </div>
-            </main>
-
-            <!-- RIGHT: Order Book -->
-            <aside class="sidebar-right">
-                <div class="panel-header">
-                    <span>Order Book</span>
-                    <span style="font-size:10px;">Spread: 0.12</span>
-                </div>
-                
-                <div class="order-book">
-                    <div class="ob-header">
-                        <div class="ob-col">Price</div>
-                        <div class="ob-col">Size</div>
-                        <div class="ob-col">Total</div>
-                    </div>
-                    
-                    <div class="ask-rows" id="ob-asks">
-                        <!-- Asks (Sells) -->
-                    </div>
-
-                    <div class="spread-row" id="ob-current-price">
-                        65,432.10 USD
-                    </div>
-
-                    <div class="bid-rows" id="ob-bids">
-                        <!-- Bids (Buys) -->
-                    </div>
-                </div>
-
-                <div class="panel-header" style="border-top:1px solid #363a45; margin-top: auto;">
-                    <span>Recent Trades</span>
-                </div>
-                <div id="recent-trades" style="flex: 0 0 200px; overflow:hidden;">
-                    <!-- Trades list -->
-                </div>
-            </aside>
-
+            <button class="chat-fab" id="chat-fab">
+                <i class="fa-solid fa-robot"></i>
+            </button>
         </div>
     </div>
 
+    <script type="module" src="main.js"></script>
 </body>
 </html>
