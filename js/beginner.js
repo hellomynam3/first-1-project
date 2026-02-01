@@ -1,23 +1,20 @@
-import { stocks } from './data.js';
+import { stocks } from './store.js';
+import { formatCurrency } from './utils.js';
 
 export function renderBeginner(container) {
     container.innerHTML = `
         <div class="glass-panel beginner-card">
             <h2 style="margin-bottom:20px;">🔰 Easy Mode Stock Analysis</h2>
-            
             <label>Choose a Stock to Learn About:</label>
-            <select id="beg-stock-select" style="background:#333; color:white; padding:10px; border-radius:8px; width:100%; margin-top:10px; font-size:1.1rem;">
+            <select id="beg-stock-select" style="background:#333; color:white; padding:12px; border-radius:8px; width:100%; margin-top:10px; font-size:1.1rem; border:1px solid #555;">
                 ${stocks.filter(s => !s.type).map(s => `<option value="${s.symbol}">${s.name} (${s.symbol})</option>`).join('')}
             </select>
         </div>
-
         <div id="beginner-content"></div>
     `;
 
     const select = document.getElementById('beg-stock-select');
     select.addEventListener('change', (e) => showExplanation(e.target.value));
-    
-    // Initial
     showExplanation(select.value);
 }
 
@@ -40,15 +37,15 @@ function showExplanation(symbol) {
         volatilityText = "🧘 **Calm Waters.** This stock price is pretty stable. It doesn't jump up or down too wildly.";
     }
 
-    // Mock 52 Week High/Low positions
-    // We'll simulate it based on current price relative to a random range
+    // Mock 52 Week High/Low
     const rangeLow = stock.price * 0.7;
     const rangeHigh = stock.price * 1.3;
     const rangePercent = ((stock.price - rangeLow) / (rangeHigh - rangeLow)) * 100;
 
     container.innerHTML = `
         <div class="glass-panel beginner-card">
-            <h3>🗣️ What is ${stock.symbol} doing?</h3>
+            <h3 style="margin-bottom:10px;">🗣️ AI Explanation for ${stock.symbol}</h3>
+            <p style="color:#ddd; margin-bottom:15px; font-style:italic;">"${stock.description}"</p>
             <div class="explanation-bubble">
                 <p>${valuationText}</p>
                 <br>
@@ -72,12 +69,19 @@ function showExplanation(symbol) {
         </div>
 
         <div class="glass-panel beginner-card">
-            <h3>📚 Today's Term: "PER"</h3>
-            <p><strong>Price-to-Earnings Ratio.</strong> Think of it as "How many years of current profits does it take to pay back the stock price?"</p>
-            <ul style="margin-left:20px; margin-top:10px; color:#ccc;">
-                <li>High PER (>30): People expect huge growth in the future.</li>
-                <li>Low PER (<15): The stock might be cheap, or the company is struggling.</li>
-            </ul>
+            <h3>📚 Key Stats Simplified</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:10px;">
+                <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                    <div style="color:#aaa; font-size:0.8rem;">Market Cap (Size)</div>
+                    <div style="font-weight:bold; font-size:1.1rem;">${formatCurrency(stock.marketCap)}</div>
+                    <div style="font-size:0.75rem; color:#888; margin-top:4px;">How much the whole company is worth.</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                    <div style="color:#aaa; font-size:0.8rem;">Dividend Yield</div>
+                    <div style="font-weight:bold; font-size:1.1rem;">${stock.dividend}%</div>
+                    <div style="font-size:0.75rem; color:#888; margin-top:4px;">Annual cash bonus paid to you.</div>
+                </div>
+            </div>
         </div>
     `;
 }

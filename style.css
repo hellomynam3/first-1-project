@@ -118,20 +118,32 @@ body {
     padding-right: 8px;
 }
 
-/* Dashboard Grid */
+/* Dashboard Layout */
+.dashboard-header-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 1000px) {
+    .dashboard-header-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
-    margin-bottom: 24px;
 }
 
 .mini-card {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 120px;
+    justify-content: center;
+    height: 100px;
 }
 
 .mini-card h3 {
@@ -140,7 +152,7 @@ body {
 }
 
 .mini-card .value {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: bold;
 }
 
@@ -150,6 +162,7 @@ body {
 
 .text-green { color: var(--accent-green); }
 .text-red { color: var(--accent-red); }
+.text-secondary { color: var(--text-secondary); }
 
 /* Section Styles */
 .section-title {
@@ -160,9 +173,14 @@ body {
     gap: 8px;
 }
 
+.sector-panel {
+    padding: 16px;
+    height: 100%;
+}
+
 .watchlist-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -171,11 +189,35 @@ body {
     padding: 20px;
     transition: transform 0.2s;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
 .stock-card:hover {
     transform: translateY(-4px);
     background: rgba(255, 255, 255, 0.08);
+}
+
+.stock-badge {
+    background: rgba(255,255,255,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.info-chips {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.chip {
+    background: rgba(0,0,0,0.3);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
 }
 
 .news-section {
@@ -193,10 +235,20 @@ body {
 .news-card.negative { border-left-color: var(--accent-red); }
 .news-card.neutral { border-left-color: var(--text-secondary); }
 
+.sentiment-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.sentiment-badge.positive { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+.sentiment-badge.negative { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+.sentiment-badge.neutral { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+
 /* Simulator & Charts */
 .chart-container {
     position: relative;
-    height: 400px;
+    height: 350px;
     width: 100%;
     margin-bottom: 24px;
     padding: 16px;
@@ -204,9 +256,26 @@ body {
 
 .quant-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 16px;
 }
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.metric-item {
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-label { font-size: 0.8rem; color: #aaa; }
+.metric-val { font-size: 1.1rem; font-weight: bold; }
 
 /* Chatbot */
 .chatbot-container {
