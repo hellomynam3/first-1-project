@@ -1,36 +1,36 @@
-# Stock AI Master V2 - Apple Style Redesign
+# Stock AI Master V3 - Pro Trader Dashboard
 
 ## Overview
-A complete visual overhaul aiming for the "Apple Aesthetic": minimalist, clean, intuitive, and premium. The interface will prioritize content visibility through generous whitespace, clear typography, and subtle frosted glass (blur) effects.
+A high-density, professional-grade stock analysis interface inspired by TradingView and Bloomberg terminals. The focus shifts from "minimalism" to **information density**, **real-time data visualization**, and **technical layout**.
 
-## Design Principles
-- **Minimalism**: Remove unnecessary borders, heavy gradients, and dense information.
-- **Typography**: Use large, bold headings and legible body text (Inter/San Francisco style).
-- **Color Palette**:
-  - **Background**: Off-white / Light Gray (`#f5f5f7` - Apple's signature background).
-  - **Cards**: White with soft, diffused shadows.
-  - **Accents**: Restrained use of color. Soft Blue for actions, precise Red/Green for stock changes but less neon/jarring.
-- **Glassmorphism**: Sidebar and floating headers will use `backdrop-filter: blur()`.
-- **Rounded Corners**: Smooth, large border-radius (e.g., 16px - 24px).
+## Design Philosophy: "The Pro Desk"
+- **Theme**: Dark Mode (Deep Gunmetal/Black).
+- **Layout**: 3-Column Fixed Layout (Watchlist - Main Chart - Order Book).
+- **Typography**: Monospace numerals for rapid scanning. Compact labels.
+- **Color Coding**: **Green (Up) / Red (Down)** (Standard International/US Style).
+- **Interactivity**: Hover effects on charts, active tab switching, rapid ticker updates.
 
-## UI Structure Changes
+## UI Structure
 
-### 1. Sidebar
-- **Appearance**: Translucent glass effect, blending into the background.
-- **Navigation**: Simple, pill-shaped hover states. Icons + Text only.
-- **Watchlist**: Clean list items, less boxy.
+### 1. Global Elements
+- **Ticker Tape**: A scrolling bar at the very top displaying global indices.
+- **Header**: Compact utility bar (Logo, Search, Time, Connection Status).
 
-### 2. Dashboard (Home)
-- **Hero Section**: A large, greeting-style header.
-- **Indices**: Horizontal scrolling cards or a clean grid with minimal text.
-- **Trending**: Larger cards with logos (placeholders) and clear price action.
+### 2. Left Sidebar: Watchlist
+- **List View**: Dense list of tickers.
+- **Columns**: Symbol | Last Price | Chg %.
+- **Mini-Charts**: Removed to save space for data density, or kept very subtle.
 
-### 3. Deep Analysis (Detail View)
-- **Header**: Massive ticker symbol and price. Very clean.
-- **Tabs**: Segmented Control style (pill-shaped toggle) rather than traditional tabs.
-- **Charts**: Minimalist grid lines, smooth curves, soft gradient fills.
-- **Cards**: "Bento Box" grid layout for Financials and News. Clean white boxes.
+### 3. Center Panel: The Workspace
+- **Symbol Header**: OHLCV (Open, High, Low, Close, Volume) data bar.
+- **Main Chart**: Large Candlestick chart (60% height).
+- **Analysis Tabs**: Financials, News, Comparison, Technicals (below chart).
+
+### 4. Right Panel: Market Depth (New)
+- **Order Book**: Simulated Bid/Ask table (Price | Size | Total).
+- **Recent Trades**: Rolling list of last executed trades.
 
 ## Technical Updates
-- **CSS**: Reset to a light theme base. extensive use of `rgba` for transparency.
-- **Charts**: Update ApexCharts config for light mode (dark text, lighter grid lines).
+- **Grid Layout**: CSS Grid for rigid, resize-friendly paneling.
+- **Scrollbars**: Custom slim scrollbars.
+- **Charts**: Advanced ApexCharts configuration (candlestick + volume + toolbar).

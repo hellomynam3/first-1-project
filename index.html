@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock AI Master</title>
+    <title>Stock AI Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script type="module" src="main.js"></script>
@@ -12,177 +12,125 @@
 
     <div class="app-container">
         
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand" id="home-btn">
-                <span style="font-size: 1.4rem;"></span> Stock AI
+        <!-- 1. Ticker Tape -->
+        <div class="ticker-tape">
+            <div class="ticker-wrap" id="ticker-wrap">
+                <!-- Injected via JS -->
             </div>
+        </div>
 
-            <nav class="watchlist-nav">
-                <h3>Watchlist</h3>
-                
-                <div class="sector-group">
-                    <h4>Technology</h4>
-                    <button class="ticker-btn" data-ticker="AAPL">Apple</button>
-                    <button class="ticker-btn" data-ticker="NVDA">NVIDIA</button>
-                    <button class="ticker-btn" data-ticker="MSFT">Microsoft</button>
-                </div>
+        <!-- 2. Header -->
+        <header class="app-header">
+            <div class="brand">
+                <span style="color: #2962ff; font-size:20px;">■</span> Stock AI Pro
+            </div>
+            <div class="search-container">
+                <input type="text" id="global-search" placeholder="Search Symbol (e.g. BTC, NVDA)...">
+            </div>
+            <div style="font-family: monospace; font-size: 12px; color: #089981;">
+                ● Connected
+            </div>
+        </header>
 
-                <div class="sector-group">
-                    <h4>Automotive</h4>
-                    <button class="ticker-btn" data-ticker="TSLA">Tesla</button>
-                    <button class="ticker-btn" data-ticker="RIVN">Rivian</button>
-                </div>
-
-                <div class="sector-group">
-                    <h4>Korea</h4>
-                    <button class="ticker-btn" data-ticker="005930">Samsung</button>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
+        <!-- 3. Main Workspace -->
+        <div class="main-workspace">
             
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <h2 id="page-title" class="page-title">Dashboard</h2>
-                <div class="search-bar">
-                    <input type="text" id="global-search" placeholder="Search Ticker...">
+            <!-- LEFT: Watchlist -->
+            <aside class="sidebar-left">
+                <div class="panel-header">
+                    <span>Watchlist</span>
+                    <span style="font-size:12px;">+</span>
                 </div>
-            </header>
+                <div class="watchlist-content" id="watchlist-container">
+                    <!-- JS Injection -->
+                </div>
+            </aside>
 
-            <!-- DASHBOARD VIEW -->
-            <div id="dashboard-view" class="view active">
-                <!-- Market Indices -->
-                <section class="indices-section">
-                    <h3>Market Overview</h3>
-                    <div class="indices-grid" id="indices-container">
-                        <!-- Cards injected by JS -->
+            <!-- CENTER: Chart & Analysis -->
+            <main class="center-panel">
+                <div class="chart-header">
+                    <div class="symbol-row">
+                        <span class="main-symbol" id="main-symbol">BTC/USD</span>
+                        <span class="main-price" id="main-price">65,432.10</span>
+                        <span class="main-change bg-up text-up" id="main-change">+2.45%</span>
                     </div>
-                </section>
-
-                <!-- Trending -->
-                <section class="trending-section">
-                    <h3>Trending Now</h3>
-                    <div class="stocks-grid" id="trending-container">
-                        <!-- Cards injected by JS -->
-                    </div>
-                </section>
-            </div>
-
-            <!-- ANALYSIS VIEW -->
-            <div id="analysis-view" class="view hidden">
-                
-                <!-- Stock Header -->
-                <div class="stock-header">
-                    <div class="stock-info-left">
-                        <span id="analysis-ticker" class="badge">AAPL</span>
-                        <h1 id="analysis-name">Apple Inc.</h1>
-                    </div>
-                    <div class="stock-price-right">
-                        <div id="analysis-price" class="big-price">$182.50</div>
-                        <div id="analysis-change" class="price-change text-up">+0.66%</div>
+                    <div class="stats-row">
+                        <div class="stat-item">Open <span id="stat-open">64,000</span></div>
+                        <div class="stat-item">High <span id="stat-high">66,000</span></div>
+                        <div class="stat-item">Low <span id="stat-low">63,500</span></div>
+                        <div class="stat-item">Vol <span id="stat-vol">45.2K</span></div>
                     </div>
                 </div>
 
-                <!-- Tabs -->
-                <div class="tabs-nav">
-                    <button class="tab-btn active" data-tab="chart">Chart</button>
-                    <button class="tab-btn" data-tab="financials">Financials</button>
-                    <button class="tab-btn" data-tab="news">News</button>
-                    <button class="tab-btn" data-tab="compare">Compare</button>
-                    <button class="tab-btn" data-tab="simulator">Simulator</button>
+                <div class="chart-container">
+                    <div id="pro-candlestick-chart" style="height: 100%;"></div>
                 </div>
 
-                <div class="tab-content">
-                    
-                    <!-- Chart Tab -->
-                    <div id="tab-chart" class="tab-pane active">
-                        <div class="chart-container-box">
-                            <div id="main-candlestick-chart"></div>
-                        </div>
-                    </div>
+                <div class="tabs-bar">
+                    <div class="tab-link active" data-tab="financials">Financials</div>
+                    <div class="tab-link" data-tab="news">News Feed</div>
+                    <div class="tab-link" data-tab="technicals">Technicals</div>
+                </div>
 
-                    <!-- Financials Tab -->
-                    <div id="tab-financials" class="tab-pane">
-                        <div class="financial-cards">
-                            <div class="f-card">
-                                <h5>Market Cap</h5>
-                                <span id="fin-mkt-cap">-</span>
+                <div class="tab-content-area">
+                    <div id="tab-financials" class="tab-pane active">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                            <div style="background: #1e222d; padding: 16px; border-radius: 4px;">
+                                <div style="color:#787b86; font-size:11px;">Market Cap</div>
+                                <div style="font-size:16px; font-weight:700; margin-top:4px;">$1.2T</div>
                             </div>
-                            <div class="f-card">
-                                <h5>P/E Ratio</h5>
-                                <span id="fin-per">-</span>
+                            <div style="background: #1e222d; padding: 16px; border-radius: 4px;">
+                                <div style="color:#787b86; font-size:11px;">Volume (24h)</div>
+                                <div style="font-size:16px; font-weight:700; margin-top:4px;">$42B</div>
                             </div>
-                            <div class="f-card">
-                                <h5>Revenue Growth</h5>
-                                <span id="fin-rev" class="text-up">-</span>
+                            <div style="background: #1e222d; padding: 16px; border-radius: 4px;">
+                                <div style="color:#787b86; font-size:11px;">Circulating Supply</div>
+                                <div style="font-size:16px; font-weight:700; margin-top:4px;">19M</div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- News Tab -->
                     <div id="tab-news" class="tab-pane">
-                        <div id="news-feed"></div>
+                        <div id="news-container"></div>
                     </div>
-
-                    <!-- Compare Tab -->
-                    <div id="tab-compare" class="tab-pane">
-                        <div class="sim-controls">
-                            <div class="control-group">
-                                <label>Competitor Ticker</label>
-                                <input type="text" id="compare-ticker-input" value="MSFT">
-                            </div>
-                            <button id="run-compare-btn">Compare</button>
-                        </div>
-                        <div class="chart-container-box">
-                            <div id="comparison-chart"></div>
-                        </div>
-                    </div>
-
-                    <!-- Simulator Tab -->
-                    <div id="tab-simulator" class="tab-pane">
-                        <div class="sim-controls">
-                            <div class="control-group">
-                                <label>Monthly Investment</label>
-                                <input type="number" id="sim-amount" value="1000">
-                            </div>
-                            <div class="control-group">
-                                <label>Duration</label>
-                                <select id="sim-duration">
-                                    <option value="1">1 Year</option>
-                                    <option value="3" selected>3 Years</option>
-                                    <option value="5">5 Years</option>
-                                </select>
-                            </div>
-                            <button id="run-sim-btn">Run</button>
-                        </div>
-                        
-                        <div class="financial-cards">
-                            <div class="f-card">
-                                <h5>Invested</h5>
-                                <span id="sim-invested">-</span>
-                            </div>
-                            <div class="f-card">
-                                <h5>Final Value</h5>
-                                <span id="sim-final" class="text-up">-</span>
-                            </div>
-                            <div class="f-card">
-                                <h5>Total Return</h5>
-                                <span id="sim-yield" class="text-up">-</span>
-                            </div>
-                        </div>
-
-                        <div class="chart-container-box">
-                            <div id="simulator-chart"></div>
-                        </div>
-                    </div>
-
                 </div>
-            </div>
+            </main>
 
-        </main>
+            <!-- RIGHT: Order Book -->
+            <aside class="sidebar-right">
+                <div class="panel-header">
+                    <span>Order Book</span>
+                    <span style="font-size:10px;">Spread: 0.12</span>
+                </div>
+                
+                <div class="order-book">
+                    <div class="ob-header">
+                        <div class="ob-col">Price</div>
+                        <div class="ob-col">Size</div>
+                        <div class="ob-col">Total</div>
+                    </div>
+                    
+                    <div class="ask-rows" id="ob-asks">
+                        <!-- Asks (Sells) -->
+                    </div>
+
+                    <div class="spread-row" id="ob-current-price">
+                        65,432.10 USD
+                    </div>
+
+                    <div class="bid-rows" id="ob-bids">
+                        <!-- Bids (Buys) -->
+                    </div>
+                </div>
+
+                <div class="panel-header" style="border-top:1px solid #363a45; margin-top: auto;">
+                    <span>Recent Trades</span>
+                </div>
+                <div id="recent-trades" style="flex: 0 0 200px; overflow:hidden;">
+                    <!-- Trades list -->
+                </div>
+            </aside>
+
+        </div>
     </div>
 
 </body>
