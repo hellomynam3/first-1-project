@@ -1,1 +1,199 @@
-/* Add styles here */
+:root {
+    /* Colors */
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --card-hover: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    
+    /* Market Colors (Korean Standard: Red=Up, Blue=Down) */
+    --color-up: #ef4444; /* Red */
+    --color-down: #3b82f6; /* Blue */
+    --color-neutral: #94a3b8;
+
+    /* Spacing */
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 2rem;
+
+    /* Fonts */
+    --font-main: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    line-height: 1.5;
+    padding-bottom: var(--space-lg);
+}
+
+/* Header */
+.app-header {
+    background-color: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--space-md) 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--color-up);
+    background: rgba(239, 68, 68, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.status-indicator .dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-up);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Main Layout */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-lg) var(--space-md);
+}
+
+h2 {
+    font-size: 1.25rem;
+    margin-bottom: var(--space-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Grids */
+.indices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.stocks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+}
+
+/* Web Components Base Styles */
+market-index, stock-card {
+    display: block;
+}
+
+/* Card Styling */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: var(--space-md);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    border-color: var(--text-secondary);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-sm);
+}
+
+.symbol {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.name {
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin-bottom: 4px;
+}
+
+.price-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+.change-container {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Utility Classes for Colors */
+.text-up { color: var(--color-up); }
+.text-down { color: var(--color-down); }
+.text-neutral { color: var(--color-neutral); }
+
+.bg-up-light { background-color: rgba(239, 68, 68, 0.1); }
+.bg-down-light { background-color: rgba(59, 130, 246, 0.1); }
+
+/* Animation */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes flash-up {
+    0% { background-color: rgba(239, 68, 68, 0.3); }
+    100% { background-color: var(--card-bg); }
+}
+
+@keyframes flash-down {
+    0% { background-color: rgba(59, 130, 246, 0.3); }
+    100% { background-color: var(--card-bg); }
+}
+
+.flash-up { animation: flash-up 0.5s ease-out; }
+.flash-down { animation: flash-down 0.5s ease-out; }

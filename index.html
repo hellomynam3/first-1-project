@@ -1,14 +1,45 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Live</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="main.js"></script>
+    <!-- Google Fonts for a modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+
+    <header class="app-header">
+        <div class="header-content">
+            <h1><span class="icon">📈</span> Market Watch</h1>
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span class="text">실시간 장운영중</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Market Indices Section -->
+        <section class="market-indices">
+            <h2>주요 지수</h2>
+            <div class="indices-grid" id="indices-container">
+                <!-- <market-index> components will be injected here -->
+            </div>
+        </section>
+
+        <!-- Popular Stocks Section -->
+        <section class="popular-stocks">
+            <h2>인기 종목</h2>
+            <div class="stocks-grid" id="stocks-container">
+                <!-- <stock-card> components will be injected here -->
+            </div>
+        </section>
+    </main>
+
 </body>
 </html>
