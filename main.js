@@ -5,7 +5,7 @@ import { renderSettings } from './js/settings.js';
 import { initChatbot } from './js/chatbot.js';
 import { renderStockDetail } from './js/stockDetail.js';
 import { appSettings, translations, stocks, initializeStore } from './js/store.js';
-import { fetchMarketData } from './js/api.js';
+import { fetchMarketData, searchStocks, fetchStockDetails } from './js/api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const contentArea = document.getElementById('content-area');
@@ -61,42 +61,91 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateNavText();
     }
 
-    // --- Search Logic ---
+    // --- Search Logic (Enhanced) ---
+    let debounceTimer;
     searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
         const query = e.target.value.toLowerCase().trim();
+        
         if (query.length === 0) {
             searchResults.classList.add('hidden');
             return;
         }
 
-        const matches = stocks.filter(s => 
-            s.symbol.toLowerCase().includes(query) || 
-            s.name.toLowerCase().includes(query)
-        );
+        // Debounce API calls
+        debounceTimer = setTimeout(async () => {
+            // 1. Local Search first
+            let matches = stocks.filter(s => 
+                s.symbol.toLowerCase().includes(query) || 
+                s.name.toLowerCase().includes(query)
+            ).map(s => ({...s, isLocal: true}));
 
-        if (matches.length > 0) {
-            searchResults.innerHTML = matches.map(s => `
-                <div class="search-item" data-symbol="${s.symbol}">
-                    <div>
-                        <span class="search-symbol">${s.symbol}</span>
-                        <span class="search-name">${s.name}</span>
-                    </div>
-                    <div class="search-price">$${s.price}</div>
-                </div>
-            `).join('');
-            searchResults.classList.remove('hidden');
-
-            searchResults.querySelectorAll('.search-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    handleStockClick(item.dataset.symbol);
-                    searchInput.value = '';
-                    searchResults.classList.add('hidden');
+            // 2. API Search (if key exists)
+            const apiResults = await searchStocks(query);
+            if (apiResults) {
+                // Filter out common stocks and format
+                const remoteMatches = apiResults
+                    .filter(r => !r.symbol.includes('.')) // Simple filter for US stocks mostly
+                    .slice(0, 5) // Limit to 5 remote results
+                    .map(r => ({
+                        symbol: r.symbol,
+                        name: r.description,
+                        price: 'Click to Load',
+                        isLocal: false
+                    }));
+                
+                // Merge (deduplicate by symbol)
+                const existingSymbols = new Set(matches.map(m => m.symbol));
+                remoteMatches.forEach(r => {
+                    if (!existingSymbols.has(r.symbol)) {
+                        matches.push(r);
+                    }
                 });
-            });
-        } else {
-            searchResults.innerHTML = `<div class="search-item" style="cursor:default; color:#aaa;">No results found</div>`;
-            searchResults.classList.remove('hidden');
-        }
+            }
+
+            // Render Results
+            if (matches.length > 0) {
+                searchResults.innerHTML = matches.map(s => `
+                    <div class="search-item" data-symbol="${s.symbol}" data-islocal="${s.isLocal}">
+                        <div>
+                            <span class="search-symbol">${s.symbol}</span>
+                            <span class="search-name">${s.name}</span>
+                        </div>
+                        <div class="search-price">${s.price === 'Click to Load' ? '<i class="fa-solid fa-cloud-arrow-down"></i>' : '$'+s.price}</div>
+                    </div>
+                `).join('');
+                searchResults.classList.remove('hidden');
+
+                searchResults.querySelectorAll('.search-item').forEach(item => {
+                    item.addEventListener('click', async () => {
+                        const symbol = item.dataset.symbol;
+                        const isLocal = item.dataset.islocal === 'true';
+
+                        searchInput.value = '';
+                        searchResults.classList.add('hidden');
+
+                        if (isLocal) {
+                            handleStockClick(symbol);
+                        } else {
+                            // Fetch full details for new stock then show
+                            contentArea.innerHTML = '<div style="text-align:center; padding-top:50px;">Fetching Stock Details...</div>';
+                            const newStock = await fetchStockDetails(symbol);
+                            if (newStock) {
+                                // Add to local store temporarily so detailed view works
+                                stocks.push(newStock); 
+                                handleStockClick(symbol);
+                            } else {
+                                alert("Failed to load stock details.");
+                                loadView('dashboard');
+                            }
+                        }
+                    });
+                });
+            } else {
+                searchResults.innerHTML = `<div class="search-item" style="cursor:default; color:#aaa;">No results found</div>`;
+                searchResults.classList.remove('hidden');
+            }
+        }, 300); // 300ms delay
     });
 
     document.addEventListener('click', (e) => {
@@ -175,7 +224,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Final Init
     updateNavText();
     loadView('dashboard');
     initChatbot();
