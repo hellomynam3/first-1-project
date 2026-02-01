@@ -1,39 +1,26 @@
 /**
  * Stock AI Master V2 - Main Logic
- * Features: Mock Data Generator, SPA Router, ApexCharts Integration
+ * Redesigned for Apple-esque Minimalist Theme
  */
 
 // --- 1. CONFIG & STATE ---
 const STATE = {
     view: 'dashboard',
-    ticker: 'NVDA', // Default selected ticker
-    charts: {} // Store ApexCharts instances to destroy/update them
-};
-
-const SECTORS = {
-    'Aerospace': ['RKLB', 'SPCE', 'LMT'],
-    'AI': ['NVDA', 'AMD', 'PLTR', 'SMCI'],
-    'EV': ['TSLA', 'RIVN', 'LCID'],
-    'Korea': ['005930', '000660']
+    ticker: 'AAPL',
+    charts: {} 
 };
 
 const MOCK_DB = {
+    'AAPL': { name: 'Apple Inc.', price: 182.50, change: 0.66 },
     'NVDA': { name: 'NVIDIA Corp', price: 820.40, change: 2.51 },
-    'AMD': { name: 'Advanced Micro Devices', price: 162.50, change: -1.2 },
+    'MSFT': { name: 'Microsoft', price: 415.20, change: 1.20 },
     'TSLA': { name: 'Tesla Inc', price: 205.60, change: -2.14 },
-    'RKLB': { name: 'Rocket Lab USA', price: 4.85, change: 5.20 },
-    '005930': { name: 'Samsung Electronics', price: 74200, change: 0.68, currency: 'KRW' },
-    '000660': { name: 'SK Hynix', price: 145000, change: -1.02, currency: 'KRW' }
-    // Others will be auto-generated if missing
+    'RIVN': { name: 'Rivian', price: 12.50, change: -4.20 },
+    '005930': { name: 'Samsung', price: 74200, change: 0.68, currency: 'KRW' }
 };
 
 // --- 2. DATA GENERATORS ---
 
-/**
- * Generates CandleStick Data (OHLC)
- * @param {number} days - Number of days to generate
- * @param {number} startPrice - Starting price
- */
 function generateOHLC(days, startPrice = 100) {
     let series = [];
     let price = startPrice;
@@ -41,7 +28,6 @@ function generateOHLC(days, startPrice = 100) {
     
     for (let i = days; i > 0; i--) {
         const date = now - (i * 86400000);
-        // Volatility 2%
         const open = price;
         const close = price * (1 + (Math.random() * 0.04 - 0.02));
         const high = Math.max(open, close) * (1 + Math.random() * 0.01);
@@ -56,12 +42,9 @@ function generateOHLC(days, startPrice = 100) {
     return series;
 }
 
-/**
- * Generates Line Data (Close Price)
- */
 function generateLineData(days, startPrice = 100) {
     const ohlc = generateOHLC(days, startPrice);
-    return ohlc.map(d => ({ x: d.x, y: d.y[3] })); // Return closing prices
+    return ohlc.map(d => ({ x: d.x, y: d.y[3] })); 
 }
 
 // --- 3. UI RENDERING & ROUTER ---
@@ -71,17 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-    // Render Dashboard initially
     renderDashboard();
-    
-    // Event Listeners
     setupNavigation();
     setupTabs();
     setupSimulators();
 }
 
 function setupNavigation() {
-    // Sidebar Ticker Clicks
     document.querySelectorAll('.ticker-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const ticker = e.target.dataset.ticker;
@@ -89,12 +68,10 @@ function setupNavigation() {
         });
     });
 
-    // Home Button
     document.getElementById('home-btn').addEventListener('click', () => {
         router('dashboard');
     });
 
-    // Search (Simple Enter Handler)
     document.getElementById('global-search').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const ticker = e.target.value.toUpperCase();
@@ -104,24 +81,21 @@ function setupNavigation() {
 }
 
 function router(viewName, ticker = null) {
-    // Update State
     STATE.view = viewName;
     if (ticker) STATE.ticker = ticker;
 
-    // Toggle Views
     document.querySelectorAll('.view').forEach(el => el.classList.remove('active', 'hidden'));
     document.querySelectorAll('.view').forEach(el => {
         if (el.id === `${viewName}-view`) el.classList.add('active');
         else el.classList.add('hidden');
     });
 
-    // Update Header Title
     const pageTitle = document.getElementById('page-title');
     if (viewName === 'dashboard') {
-        pageTitle.innerText = 'Market Dashboard';
+        pageTitle.innerText = 'Dashboard';
         renderDashboard();
     } else {
-        pageTitle.innerText = 'Deep Analysis';
+        pageTitle.innerText = 'Analysis';
         renderAnalysis(STATE.ticker);
     }
 }
@@ -132,11 +106,9 @@ function renderDashboard() {
     const indicesContainer = document.getElementById('indices-container');
     const trendingContainer = document.getElementById('trending-container');
     
-    // Clear previous
     indicesContainer.innerHTML = '';
     trendingContainer.innerHTML = '';
 
-    // 1. Indices
     const indices = [
         { name: 'S&P 500', price: 5100.80, change: 0.50 },
         { name: 'NASDAQ', price: 16200.50, change: 0.93 },
@@ -148,27 +120,25 @@ function renderDashboard() {
         const id = `idx-chart-${i}`;
         const color = idx.change >= 0 ? 'text-up' : 'text-down';
         const sign = idx.change >= 0 ? '+' : '';
-        
+        const chartColor = idx.change >= 0 ? '#34c759' : '#ff3b30';
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-            <div class="card-header">
-                <span class="name">${idx.name}</span>
+            <div style="margin-bottom:12px;">
+                <span class="name" style="font-weight:600; color:#86868b;">${idx.name}</span>
             </div>
-            <div class="price-container">
-                <span class="price">${idx.price.toLocaleString()}</span>
-                <span class="change-container ${color}">${sign}${idx.change}%</span>
+            <div style="display:flex; align-items:baseline; gap:8px;">
+                <span class="price" style="font-size:1.6rem; font-weight:700;">${idx.price.toLocaleString()}</span>
+                <span class="${color}" style="font-weight:600;">${sign}${idx.change}%</span>
             </div>
-            <div id="${id}" style="min-height: 60px;"></div>
+            <div id="${id}" style="margin-top:10px; min-height:60px;"></div>
         `;
         indicesContainer.appendChild(card);
-
-        // Render Sparkline
-        renderSparkline(id, idx.change >= 0 ? '#ef4444' : '#3b82f6');
+        renderSparkline(id, chartColor);
     });
 
-    // 2. Trending Stocks
-    const trending = ['NVDA', 'TSLA', 'RKLB', 'AMD'];
+    const trending = ['AAPL', 'NVDA', 'TSLA', 'MSFT'];
     trending.forEach(ticker => {
         const data = MOCK_DB[ticker] || { name: ticker, price: 100, change: 1.5 };
         const color = data.change >= 0 ? 'text-up' : 'text-down';
@@ -176,31 +146,37 @@ function renderDashboard() {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-            <div class="card-header">
-                <span class="symbol">${ticker}</span>
-                <span class="badge" style="font-size: 0.7rem; cursor:pointer;" onclick="router('analysis', '${ticker}')">Analyze</span>
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <div>
+                    <div style="font-weight:700; font-size:1.1rem;">${ticker}</div>
+                    <div style="font-size:0.9rem; color:#86868b;">${data.name}</div>
+                </div>
+                <div class="badge" style="height:fit-content;">Stock</div>
             </div>
-            <div class="name" style="font-size:0.9rem; margin-bottom:8px;">${data.name}</div>
-            <div class="price-container">
-                <span class="price" style="font-size:1.2rem;">${data.price}</span>
-                <span class="change-container ${color}">${data.change}%</span>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <span style="font-size:1.8rem; font-weight:600;">$${data.price}</span>
+                <span class="${color}" style="font-weight:600; font-size:1.1rem;">${data.change}%</span>
             </div>
         `;
         trendingContainer.appendChild(card);
+        
+        // Add click event for trending cards
+        card.style.cursor = 'pointer';
+        card.onclick = () => router('analysis', ticker);
     });
 }
 
 function renderSparkline(elementId, color) {
-    const data = generateLineData(5, 1000); // 5 days data
+    const data = generateLineData(10, 1000);
     const options = {
         series: [{ data: data.map(d => d.y) }],
         chart: {
             type: 'area',
-            height: 60,
+            height: 50,
             sparkline: { enabled: true }
         },
         stroke: { curve: 'smooth', width: 2 },
-        fill: { opacity: 0.2 },
+        fill: { opacity: 0.1 },
         colors: [color],
         tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: () => '' } }, marker: { show: false } }
     };
@@ -212,7 +188,6 @@ function renderSparkline(elementId, color) {
 function renderAnalysis(ticker) {
     const data = MOCK_DB[ticker] || { name: ticker, price: 100.00, change: 0.00 };
     
-    // Update Header
     document.getElementById('analysis-name').innerText = data.name;
     document.getElementById('analysis-ticker').innerText = ticker;
     document.getElementById('analysis-price').innerText = data.currency === 'KRW' ? `₩${data.price.toLocaleString()}` : `$${data.price}`;
@@ -221,7 +196,6 @@ function renderAnalysis(ticker) {
     changeEl.innerText = `${data.change >= 0 ? '+' : ''}${data.change}%`;
     changeEl.className = `price-change ${data.change >= 0 ? 'text-up' : 'text-down'}`;
 
-    // Reset Tabs to first one
     switchTab('chart');
 }
 
@@ -235,14 +209,12 @@ function setupTabs() {
 }
 
 function switchTab(tabId) {
-    // UI Toggle
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     document.getElementById(`tab-${tabId}`).classList.add('active');
 
-    // Load Tab Content
     const ticker = STATE.ticker;
     if (tabId === 'chart') loadAdvancedChart(ticker);
     if (tabId === 'compare') loadComparisonChart(ticker);
@@ -251,29 +223,34 @@ function switchTab(tabId) {
     if (tabId === 'simulator') loadSimulator(ticker);
 }
 
-// --- 5.1 Advanced Chart ---
 function loadAdvancedChart(ticker) {
     if (STATE.charts.main) STATE.charts.main.destroy();
 
     const data = generateOHLC(90, MOCK_DB[ticker]?.price || 100);
     
     const options = {
-        series: [{
-            name: 'candle',
-            type: 'candlestick',
-            data: data
-        }],
+        series: [{ name: 'Price', data: data }],
         chart: {
             type: 'candlestick',
             height: 400,
-            background: 'transparent',
-            toolbar: { show: false }
+            toolbar: { show: false },
+            fontFamily: '-apple-system, sans-serif'
         },
-        theme: { mode: 'dark' },
-        stroke: { width: 1 },
-        xaxis: { type: 'datetime' },
-        yaxis: { tooltip: { enabled: true } },
-        grid: { borderColor: '#334155' }
+        theme: { mode: 'light' }, // Light Theme
+        xaxis: {
+            type: 'datetime',
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        grid: {
+            borderColor: '#f5f5f7',
+            xaxis: { lines: { show: false } } 
+        },
+        plotOptions: {
+            candlestick: {
+                colors: { upward: '#34c759', downward: '#ff3b30' }
+            }
+        }
     };
 
     const chart = new ApexCharts(document.querySelector("#main-candlestick-chart"), options);
@@ -281,28 +258,20 @@ function loadAdvancedChart(ticker) {
     STATE.charts.main = chart;
 }
 
-// --- 5.2 Comparison ---
 function loadComparisonChart(ticker) {
     const compInput = document.getElementById('compare-ticker-input');
     const compBtn = document.getElementById('run-compare-btn');
     
-    // Handler for button (remove old listeners to avoid dupes if any - simplified here)
-    compBtn.onclick = () => {
-        const competitor = compInput.value.toUpperCase();
-        renderComparison(ticker, competitor);
-    };
-
-    // Initial Render
+    compBtn.onclick = () => renderComparison(ticker, compInput.value.toUpperCase());
     renderComparison(ticker, compInput.value);
 }
 
 function renderComparison(tickerA, tickerB) {
     if (STATE.charts.compare) STATE.charts.compare.destroy();
 
-    const dataA = generateLineData(365, 100);
-    const dataB = generateLineData(365, 100);
+    const dataA = generateLineData(100, 100);
+    const dataB = generateLineData(100, 100);
 
-    // Normalize to percentage return
     const normalize = (arr) => {
         const start = arr[0].y;
         return arr.map(d => ({ x: d.x, y: ((d.y - start) / start) * 100 }));
@@ -313,13 +282,12 @@ function renderComparison(tickerA, tickerB) {
             { name: tickerA, data: normalize(dataA) },
             { name: tickerB, data: normalize(dataB) }
         ],
-        chart: { type: 'line', height: 400, background: 'transparent', toolbar: { show: false } },
-        theme: { mode: 'dark' },
+        chart: { type: 'line', height: 400, toolbar: { show: false } },
         stroke: { width: 2, curve: 'smooth' },
-        colors: ['#ef4444', '#3b82f6'],
-        xaxis: { type: 'datetime' },
-        yaxis: { labels: { formatter: (val) => val.toFixed(1) + '%' } },
-        grid: { borderColor: '#334155' }
+        colors: ['#0071e3', '#86868b'], // Apple Blue vs Gray
+        xaxis: { type: 'datetime', axisBorder: { show: false } },
+        grid: { borderColor: '#f5f5f7' },
+        yaxis: { labels: { formatter: (val) => val.toFixed(1) + '%' } }
     };
 
     const chart = new ApexCharts(document.querySelector("#comparison-chart"), options);
@@ -327,111 +295,87 @@ function renderComparison(tickerA, tickerB) {
     STATE.charts.compare = chart;
 }
 
-// --- 5.3 Financials ---
 function loadFinancials(ticker) {
-    // Mock Data Update
-    const mktCap = (Math.random() * 2 + 0.5).toFixed(1); // 0.5T - 2.5T
+    const mktCap = (Math.random() * 2 + 0.5).toFixed(1);
     const per = (Math.random() * 50 + 20).toFixed(1);
     const rev = (Math.random() * 50 + 10).toFixed(1);
 
     document.getElementById('fin-mkt-cap').innerText = `$${mktCap}T`;
     document.getElementById('fin-per').innerText = per;
     document.getElementById('fin-rev').innerText = `+${rev}%`;
-
-    // Target Price
-    const currentPrice = MOCK_DB[ticker]?.price || 100;
-    const target = (currentPrice * 1.15).toFixed(2);
-    document.getElementById('fin-target').innerText = `$${target}`;
 }
 
-// --- 5.4 News & Sentiment ---
 function loadNews(ticker) {
     const feed = document.getElementById('news-feed');
     feed.innerHTML = '';
 
     const templates = [
-        { text: "surges to record highs after earnings beat", type: 'pos' },
-        { text: "faces regulatory headwinds in Europe", type: 'neg' },
-        { text: "announces new strategic partnership with Google", type: 'pos' },
-        { text: "production halted due to supply chain issues", type: 'neg' },
-        { text: "analysts upgrade rating to Overweight", type: 'pos' }
+        { text: "Hits All-Time High", type: 'pos' },
+        { text: "Facing Antitrust Concerns", type: 'neg' },
+        { text: "Announces New Product Line", type: 'pos' },
+        { text: "Quarterly Revenue Beats Estimates", type: 'pos' },
+        { text: "Supply Chain Delays Expected", type: 'neg' }
     ];
 
-    // Generate 5 random news items
     for (let i = 0; i < 5; i++) {
         const item = templates[Math.floor(Math.random() * templates.length)];
-        const timeAgo = Math.floor(Math.random() * 12) + 1;
-        
         const div = document.createElement('div');
         div.className = 'news-item';
         div.innerHTML = `
             <div>
-                <div class="news-meta">${timeAgo} hours ago • Business Wire</div>
                 <div class="news-title">${ticker} ${item.text}</div>
+                <div class="news-meta">Wall St. Journal • 2h ago</div>
             </div>
             <span class="sentiment-badge ${item.type === 'pos' ? 'sentiment-pos' : 'sentiment-neg'}">
-                ${item.type === 'pos' ? 'Positive' : 'Negative'}
+                ${item.type === 'pos' ? 'BULLISH' : 'BEARISH'}
             </span>
         `;
         feed.appendChild(div);
     }
 }
 
-// --- 5.5 Simulator (DCA) ---
 function setupSimulators() {
     document.getElementById('run-sim-btn').addEventListener('click', () => {
         loadSimulator(STATE.ticker, true);
     });
 }
 
-function loadSimulator(ticker, isRun = false) {
+function loadSimulator(ticker) {
     const amount = parseFloat(document.getElementById('sim-amount').value);
     const durationYears = parseInt(document.getElementById('sim-duration').value);
     
-    // Simulate Data
     const months = durationYears * 12;
-    const historicalData = generateLineData(months * 30, 100); // Daily data roughly
+    const historicalData = generateLineData(months * 30, 100);
     
-    // Pick one data point per month
     let totalInvested = 0;
     let totalShares = 0;
     const assetGrowth = [];
-
-    // Filter to monthly points
     const monthlyPoints = historicalData.filter((_, i) => i % 30 === 0).slice(0, months);
 
-    monthlyPoints.forEach((point, i) => {
+    monthlyPoints.forEach((point) => {
         totalInvested += amount;
-        const sharesBought = amount / point.y;
-        totalShares += sharesBought;
-        
-        assetGrowth.push({
-            x: point.x,
-            y: totalShares * point.y
-        });
+        totalShares += amount / point.y;
+        assetGrowth.push({ x: point.x, y: totalShares * point.y });
     });
 
     const finalValue = totalShares * monthlyPoints[monthlyPoints.length - 1].y;
     const yieldPercent = ((finalValue - totalInvested) / totalInvested) * 100;
 
-    // Update UI
     document.getElementById('sim-invested').innerText = `$${totalInvested.toLocaleString()}`;
     document.getElementById('sim-final').innerText = `$${Math.round(finalValue).toLocaleString()}`;
     document.getElementById('sim-yield').innerText = `${yieldPercent > 0 ? '+' : ''}${yieldPercent.toFixed(1)}%`;
 
-    // Render Chart
     if (STATE.charts.sim) STATE.charts.sim.destroy();
 
     const options = {
-        series: [{ name: 'Portfolio Value', data: assetGrowth }],
-        chart: { type: 'area', height: 350, background: 'transparent', toolbar: { show: false } },
-        theme: { mode: 'dark' },
+        series: [{ name: 'Value', data: assetGrowth }],
+        chart: { type: 'area', height: 350, toolbar: { show: false } },
         stroke: { curve: 'smooth', width: 2 },
-        colors: ['#22c55e'],
-        fill: { opacity: 0.3, type: 'gradient' },
-        xaxis: { type: 'datetime' },
+        colors: ['#34c759'],
+        fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
+        xaxis: { type: 'datetime', axisBorder: { show: false } },
         yaxis: { labels: { formatter: (val) => '$' + Math.round(val) } },
-        grid: { borderColor: '#334155' }
+        grid: { borderColor: '#f5f5f7' }
     };
 
     const chart = new ApexCharts(document.querySelector("#simulator-chart"), options);
@@ -439,5 +383,4 @@ function loadSimulator(ticker, isRun = false) {
     STATE.charts.sim = chart;
 }
 
-// Global scope export for HTML onClick handlers
 window.router = router;

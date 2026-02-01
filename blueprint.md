@@ -1,46 +1,36 @@
-# Stock AI Master V2 Blueprint
+# Stock AI Master V2 - Apple Style Redesign
 
 ## Overview
-A comprehensive stock analysis platform featuring a real-time dashboard and deep-dive analytical tools. The application uses a "Sidebar + Main Content" layout to provide quick access to market trends and detailed stock reports.
+A complete visual overhaul aiming for the "Apple Aesthetic": minimalist, clean, intuitive, and premium. The interface will prioritize content visibility through generous whitespace, clear typography, and subtle frosted glass (blur) effects.
 
-## Features
+## Design Principles
+- **Minimalism**: Remove unnecessary borders, heavy gradients, and dense information.
+- **Typography**: Use large, bold headings and legible body text (Inter/San Francisco style).
+- **Color Palette**:
+  - **Background**: Off-white / Light Gray (`#f5f5f7` - Apple's signature background).
+  - **Cards**: White with soft, diffused shadows.
+  - **Accents**: Restrained use of color. Soft Blue for actions, precise Red/Green for stock changes but less neon/jarring.
+- **Glassmorphism**: Sidebar and floating headers will use `backdrop-filter: blur()`.
+- **Rounded Corners**: Smooth, large border-radius (e.g., 16px - 24px).
 
-### 1. Navigation & UX (Sidebar)
-- **Home Access**: "Stock AI Master V2" logo/button to return to the dashboard.
-- **My Watchlist**: Categorized buttons for quick access to specific sector leaders.
-  - Sectors: Aerospace, AI/Semicon, EV, Domestic Leaders.
-  - Action: Clicking a ticker switches to the **Deep Analysis** view.
+## UI Structure Changes
 
-### 2. Market Dashboard (Home View)
-- **Key Indices Cards**:
-  - Targets: S&P 500, NASDAQ, Bitcoin, KRW/USD.
-  - Content: Price, Change %, and a **Sparkline (Mini-chart)** for 5-day trend.
-- **Trending Stocks**:
-  - Curated list of hot stocks (NVDA, TSLA, etc.).
-  - "Analyze" button to open the deep dive view.
+### 1. Sidebar
+- **Appearance**: Translucent glass effect, blending into the background.
+- **Navigation**: Simple, pill-shaped hover states. Icons + Text only.
+- **Watchlist**: Clean list items, less boxy.
+
+### 2. Dashboard (Home)
+- **Hero Section**: A large, greeting-style header.
+- **Indices**: Horizontal scrolling cards or a clean grid with minimal text.
+- **Trending**: Larger cards with logos (placeholders) and clear price action.
 
 ### 3. Deep Analysis (Detail View)
-A tabbed interface for comprehensive stock data.
+- **Header**: Massive ticker symbol and price. Very clean.
+- **Tabs**: Segmented Control style (pill-shaped toggle) rather than traditional tabs.
+- **Charts**: Minimalist grid lines, smooth curves, soft gradient fills.
+- **Cards**: "Bento Box" grid layout for Financials and News. Clean white boxes.
 
-- **Tab 1: 📈 Advanced Chart**
-  - **Candlestick Chart**: OHLC data.
-  - **Overlays**: 20-day (Orange) and 60-day (Blue) Moving Averages.
-  - **Volume**: Color-coded bars (Red/Green).
-- **Tab 2: ⚖️ Peer Comparison**
-  - Feature: Compare current stock vs. competitor (e.g., NVDA vs. AMD).
-  - Visualization: 1-Year Normalized Return (%) Line Chart.
-- **Tab 3: 💰 Financials**
-  - **Cards**: Market Cap, PER, Revenue.
-  - **Analyst Gauge**: Buy/Hold/Sell progress bar & Target Price gap.
-- **Tab 4: 🗞️ AI News**
-  - **Sentiment Analysis**: Auto-tagging news as "Positive" (Green) or "Negative" (Red) based on keywords (surge, drop, risk, record).
-- **Tab 5: 🚀 Simulator (DCA)**
-  - **Input**: Investment Duration, Monthly Amount.
-  - **Output**: Total Invested, Final Value, Yield %.
-  - **Chart**: Asset growth over time.
-
-## Technical Architecture
-- **Library**: **ApexCharts** (via CDN) for high-performance financial charting.
-- **State Management**: Simple vanilla JS router (`currentView` state).
-- **Data**: Advanced mock data generator for historical OHLC prices to support charts and simulations.
-- **Styling**: CSS Grid/Flexbox, Dark Mode, Glassmorphism.
+## Technical Updates
+- **CSS**: Reset to a light theme base. extensive use of `rgba` for transparency.
+- **Charts**: Update ApexCharts config for light mode (dark text, lighter grid lines).
