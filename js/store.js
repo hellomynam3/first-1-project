@@ -3,11 +3,54 @@
 
 export let stocks = [];
 export let news = [];
+export let portfolio = JSON.parse(localStorage.getItem('portfolio')) || [];
+export let watchlist = JSON.parse(localStorage.getItem('watchlist')) || ['AAPL', 'TSLA', 'NVDA', 'MSFT'];
 
 // This will be called on app initialization
 export function initializeStore(data) {
     stocks = data.stocks || [];
     news = data.news || [];
+}
+
+export function savePortfolio(newPortfolio) {
+    portfolio = newPortfolio;
+    localStorage.setItem('portfolio', JSON.stringify(portfolio));
+}
+
+export function saveWatchlist(newWatchlist) {
+    watchlist = newWatchlist;
+    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+}
+
+export function addToPortfolio(symbol, price, quantity) {
+    const existing = portfolio.find(p => p.symbol === symbol);
+    if (existing) {
+        // Weighted Average Price
+        const totalCost = (existing.avgPrice * existing.quantity) + (price * quantity);
+        const totalQty = existing.quantity + quantity;
+        existing.avgPrice = totalCost / totalQty;
+        existing.quantity = totalQty;
+    } else {
+        portfolio.push({ symbol, avgPrice: price, quantity });
+    }
+    savePortfolio(portfolio);
+}
+
+export function removeFromPortfolio(symbol) {
+    const newPortfolio = portfolio.filter(p => p.symbol !== symbol);
+    savePortfolio(newPortfolio);
+}
+
+export function addToWatchlist(symbol) {
+    if (!watchlist.includes(symbol)) {
+        watchlist.push(symbol);
+        saveWatchlist(watchlist);
+    }
+}
+
+export function removeFromWatchlist(symbol) {
+    const newWatchlist = watchlist.filter(s => s !== symbol);
+    saveWatchlist(newWatchlist);
 }
 
 export const translations = {
@@ -40,7 +83,15 @@ export const translations = {
         back_dashboard: "Back to Dashboard",
         ai_analysis: "AI Analysis",
         related_news: "Related News",
-        key_stats: "Key Statistics"
+        key_stats: "Key Statistics",
+        portfolio: "My Portfolio",
+        total_profit: "Total Profit",
+        add_holding: "Add Holding",
+        symbol: "Symbol",
+        buy_price: "Buy Price",
+        qty: "Qty",
+        add: "Add",
+        edit_watchlist: "Edit Watchlist"
     },
     ko: {
         nav_dashboard: "대시보드",
@@ -71,7 +122,15 @@ export const translations = {
         back_dashboard: "대시보드로 돌아가기",
         ai_analysis: "AI 심층 분석",
         related_news: "관련 뉴스",
-        key_stats: "핵심 지표"
+        key_stats: "핵심 지표",
+        portfolio: "내 자산 현황",
+        total_profit: "총 평가손익",
+        add_holding: "자산 추가",
+        symbol: "종목코드",
+        buy_price: "매수가",
+        qty: "수량",
+        add: "추가",
+        edit_watchlist: "관심종목 편집"
     }
 };
 

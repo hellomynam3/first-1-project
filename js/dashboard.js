@@ -1,4 +1,4 @@
-import { stocks, news, appSettings, translations } from './store.js';
+import { stocks, news, appSettings, translations, portfolio, watchlist, addToPortfolio, removeFromPortfolio, addToWatchlist, removeFromWatchlist } from './store.js';
 import { getMarketStatus, formatCurrency } from './utils.js';
 import { generateHistory } from './math.js';
 
@@ -18,9 +18,31 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
                 </div>
             </div>
         </div>
-        
+
+        <!-- Portfolio Section -->
         <div class="section-title" style="margin-top:20px;">
-            <i class="fa-solid fa-fire"></i> ${t.watchlist}
+            <i class="fa-solid fa-wallet"></i> ${t.portfolio}
+        </div>
+        <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
+            <div id="portfolio-summary" style="margin-bottom:20px; font-size:1.2rem; font-weight:bold;"></div>
+            <div id="portfolio-list" style="display:grid; gap:10px;"></div>
+            
+            <!-- Add Holding Form -->
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--glass-border); display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="text" id="port-symbol" placeholder="${t.symbol}" class="styled-input" style="width:100px; text-transform:uppercase;">
+                <input type="number" id="port-price" placeholder="${t.buy_price}" class="styled-input" style="width:100px;">
+                <input type="number" id="port-qty" placeholder="${t.qty}" class="styled-input" style="width:80px;">
+                <button id="btn-add-port" class="action-btn">${t.add}</button>
+            </div>
+        </div>
+        
+        <!-- Watchlist Section -->
+        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span><i class="fa-solid fa-fire"></i> ${t.watchlist}</span>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="watch-symbol" placeholder="${t.symbol}" class="styled-input" style="width:100px; padding:5px; font-size:0.9rem; text-transform:uppercase;">
+                <button id="btn-add-watch" class="action-btn" style="padding:5px 10px; font-size:0.9rem;">${t.add}</button>
+            </div>
         </div>
         <div class="watchlist-grid" id="watchlist"></div>
 
@@ -33,8 +55,39 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
     updateMarketStatus();
     renderIndices();
     renderSectors();
+    renderPortfolio();
     renderWatchlist(onStockClick);
     renderNews(onNewsClick);
+
+    // Event Listeners
+    document.getElementById('btn-add-port').addEventListener('click', () => {
+        const s = document.getElementById('port-symbol').value.toUpperCase();
+        const p = parseFloat(document.getElementById('port-price').value);
+        const q = parseFloat(document.getElementById('port-qty').value);
+        if(s && p && q) {
+            addToPortfolio(s, p, q);
+            renderPortfolio();
+            // Clear inputs
+            document.getElementById('port-symbol').value = '';
+            document.getElementById('port-price').value = '';
+            document.getElementById('port-qty').value = '';
+        }
+    });
+
+    document.getElementById('btn-add-watch').addEventListener('click', () => {
+        const s = document.getElementById('watch-symbol').value.toUpperCase();
+        if(s) {
+            // Check if valid stock (optional, but good)
+            const exists = stocks.find(st => st.symbol === s);
+            if(exists) {
+                addToWatchlist(s);
+                renderWatchlist(onStockClick);
+                document.getElementById('watch-symbol').value = '';
+            } else {
+                alert('Symbol not found in demo data (Try: AAPL, TSLA, NVDA, AMD, MSFT)');
+            }
+        }
+    });
 }
 
 function updateMarketStatus() {
@@ -110,10 +163,103 @@ function renderSectors() {
     });
 }
 
+function renderPortfolio() {
+    const container = document.getElementById('portfolio-list');
+    const summary = document.getElementById('portfolio-summary');
+    const t = translations[appSettings.lang];
+    
+    if (portfolio.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); padding:20px;">No holdings added yet.</div>`;
+        summary.innerHTML = '';
+        return;
+    }
+
+    let totalVal = 0;
+    let totalCost = 0;
+
+    container.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 50px; padding-bottom:10px; border-bottom:1px solid var(--glass-border); font-size:0.9rem; color:var(--text-secondary);">
+            <div>${t.symbol}</div>
+            <div>Avg Price</div>
+            <div>Current</div>
+            <div>Profit/Loss</div>
+            <div></div>
+        </div>
+    `;
+
+    portfolio.forEach(p => {
+        const stock = stocks.find(s => s.symbol === p.symbol);
+        const currentPrice = stock ? stock.price : p.avgPrice; // Fallback
+        const marketVal = currentPrice * p.quantity;
+        const costBasis = p.avgPrice * p.quantity;
+        const pl = marketVal - costBasis;
+        const plPercent = (pl / costBasis) * 100;
+        
+        totalVal += marketVal;
+        totalCost += costBasis;
+
+        const isUp = pl >= 0;
+        const colorClass = isUp ? 'text-green' : 'text-red';
+
+        const row = document.createElement('div');
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '1fr 1fr 1fr 1fr 50px';
+        row.style.padding = '12px 0';
+        row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        row.style.alignItems = 'center';
+        
+        row.innerHTML = `
+            <div style="font-weight:bold;">${p.symbol} <span style="font-size:0.8rem; color:var(--text-secondary);">x${p.quantity}</span></div>
+            <div>$${p.avgPrice.toFixed(2)}</div>
+            <div>$${currentPrice.toFixed(2)}</div>
+            <div class="${colorClass}">
+                $${Math.abs(pl).toFixed(2)} (${plPercent.toFixed(1)}%)
+            </div>
+            <div style="text-align:right;">
+                <button class="remove-port-btn" data-symbol="${p.symbol}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    const totalPL = totalVal - totalCost;
+    const totalPLPercent = totalCost > 0 ? (totalPL / totalCost) * 100 : 0;
+    const totalColor = totalPL >= 0 ? 'text-green' : 'text-red';
+
+    summary.innerHTML = `
+        ${t.total_profit}: <span class="${totalColor}">$${totalPL.toFixed(2)} (${totalPLPercent.toFixed(1)}%)</span>
+        <div style="font-size:0.9rem; font-weight:normal; color:var(--text-secondary); margin-top:5px;">
+            Total Value: $${totalVal.toFixed(2)}
+        </div>
+    `;
+
+    // Bind remove events
+    container.querySelectorAll('.remove-port-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const sym = e.currentTarget.dataset.symbol; // Use currentTarget for button
+            removeFromPortfolio(sym);
+            renderPortfolio();
+        });
+    });
+}
+
 function renderWatchlist(onStockClick) {
     const t = translations[appSettings.lang];
     const container = document.getElementById('watchlist');
-    const myStocks = stocks.filter(s => !s.type);
+    container.innerHTML = ''; // Clear
+
+    // Filter stocks that are in the watchlist array
+    const myStocks = stocks.filter(s => watchlist.includes(s.symbol));
+
+    // Handle case where watchlist has symbols not in data (e.g., loaded from localstorage but API failed)
+    // For now, we only show matches.
+
+    if (myStocks.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-secondary);">Your watchlist is empty.</div>`;
+        return;
+    }
 
     myStocks.forEach(s => {
         const isUp = s.change >= 0;
@@ -125,24 +271,39 @@ function renderWatchlist(onStockClick) {
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                 <span class="stock-badge">${s.symbol} ${s.isLive ? '<span class="live-pulse">LIVE</span>' : ''}</span>
-                <span class="${colorClass}" style="font-weight:bold;">${isUp ? '+' : ''}${s.change}%</span>
+                <button class="remove-watch-btn" data-symbol="${s.symbol}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${s.name}
+            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <div>
+                    <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">
+                        ${s.name}
+                    </div>
+                    <div style="font-size:1.6rem; font-weight:bold;">$${s.price.toFixed(2)}</div>
+                </div>
+                <div class="${colorClass}" style="font-weight:bold; font-size:1.1rem; margin-bottom:5px;">${isUp ? '+' : ''}${s.change}%</div>
             </div>
-            <div style="font-size:1.8rem; font-weight:bold; margin-bottom:10px;">$${s.price.toFixed(2)}</div>
             
-            <div class="info-chips">
+            <div class="info-chips" style="margin-top:10px;">
                 <div class="chip">${t.mcap}: ${formatCurrency(s.marketCap)}</div>
                 <div class="chip">${t.per}: ${s.peRatio}</div>
             </div>
-            <div style="margin-top:10px; font-size:0.8rem; color:var(--text-secondary);">
-                ${t.rating}: <span class="${ratingColor}">${s.analystRating}</span>
-            </div>
         `;
         
-        card.addEventListener('click', () => {
-            if (onStockClick) onStockClick(s.symbol);
+        // Click on card body to detail, but not on remove button
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.remove-watch-btn')) {
+                if (onStockClick) onStockClick(s.symbol);
+            }
+        });
+
+        // Remove button logic
+        const removeBtn = card.querySelector('.remove-watch-btn');
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFromWatchlist(s.symbol);
+            renderWatchlist(onStockClick);
         });
 
         container.appendChild(card);
