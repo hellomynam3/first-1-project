@@ -21,6 +21,10 @@ A comprehensive stock analysis platform combining the intuitiveness of **Toss Se
 
 ### 3. 🐣 Beginner Mode (Easy Mode)
 - **Conversational Analytics:** "High PER" -> "Expensive stock price relative to earnings."
+- **Enhanced Analysis:** New "Profitability" and "Debt Health" cards with simple metaphors.
+- **Investment Simulator:** "What If" calculator ("If I invested $1k a year ago...").
+- **Investor Personality Test:** A fun quiz to determine risk tolerance.
+- **Learning Hub:** Interactive cards explaining stock market basics.
 - **52-Week Range:** Visual progress bar.
 - **Glossary:** Built-in term lookup.
 

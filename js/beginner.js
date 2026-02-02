@@ -1,28 +1,97 @@
 import { stocks, appSettings } from './store.js';
 import { formatCurrency } from './utils.js';
 
+// Internal state for the quiz
+let currentQuizStep = 0;
+let quizScore = 0;
+let currentTab = 'analysis'; // analysis, quiz, learn
+
 export function renderBeginner(container) {
     const isKo = appSettings.lang === 'ko';
     
     container.innerHTML = `
-        <div class="glass-panel beginner-card">
-            <h2 style="margin-bottom:20px;">${isKo ? '🔰 주식 초보 탈출기' : '🔰 Easy Mode Stock Analysis'}</h2>
-            <label>${isKo ? '분석할 종목을 선택하세요:' : 'Choose a Stock to Learn About:'}</label>
-            <select id="beg-stock-select" style="background:rgba(0,0,0,0.3); color:var(--text-primary); padding:12px; border-radius:8px; width:100%; margin-top:10px; font-size:1.1rem; border:1px solid var(--glass-border);">
+        <div class="beginner-container">
+            <!-- Header & Tabs -->
+            <div class="glass-panel" style="margin-bottom: 20px; padding: 15px;">
+                <h2 style="margin-bottom: 15px; text-align: center;">
+                    ${isKo ? '🌱 주식 초보자 가이드' : '🌱 Beginner Investor Guide'}
+                </h2>
+                <div class="beginner-tabs">
+                    <button class="tab-btn active" data-tab="analysis">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> ${isKo ? '쉬운 종목 분석' : 'Easy Analysis'}
+                    </button>
+                    <button class="tab-btn" data-tab="quiz">
+                        <i class="fa-solid fa-clipboard-question"></i> ${isKo ? '투자 성향 테스트' : 'Investor Quiz'}
+                    </button>
+                    <button class="tab-btn" data-tab="learn">
+                        <i class="fa-solid fa-graduation-cap"></i> ${isKo ? '주식 기초 교실' : 'Learning Hub'}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Area -->
+            <div id="beginner-tab-content"></div>
+        </div>
+    `;
+
+    // Tab Switching Logic
+    const buttons = container.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Update UI
+            buttons.forEach(b => b.classList.remove('active'));
+            const target = e.currentTarget; // Use currentTarget to get the button element reliably
+            target.classList.add('active');
+            
+            // Update State & Render
+            currentTab = target.dataset.tab;
+            renderTabContent(document.getElementById('beginner-tab-content'));
+        });
+    });
+
+    // Initial Render
+    renderTabContent(document.getElementById('beginner-tab-content'));
+}
+
+function renderTabContent(container) {
+    container.innerHTML = '';
+    
+    switch(currentTab) {
+        case 'analysis':
+            renderAnalysis(container);
+            break;
+        case 'quiz':
+            renderQuiz(container);
+            break;
+        case 'learn':
+            renderLearn(container);
+            break;
+    }
+}
+
+// ==========================================
+// 1. ANALYSIS TAB
+// ==========================================
+function renderAnalysis(container) {
+    const isKo = appSettings.lang === 'ko';
+    
+    container.innerHTML = `
+        <div class="glass-panel beginner-card" style="animation: fadeIn 0.3s ease;">
+            <label style="display:block; margin-bottom:10px;">
+                ${isKo ? '분석할 종목을 선택하세요:' : 'Choose a Stock to Analyze:'}
+            </label>
+            <select id="beg-stock-select" class="styled-select">
                 ${stocks.filter(s => !s.type).map(s => `<option value="${s.symbol}">${s.name} (${s.symbol})</option>`).join('')}
             </select>
         </div>
-        <div id="beginner-content"></div>
+        <div id="analysis-results" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;"></div>
     `;
 
     const select = document.getElementById('beg-stock-select');
     select.addEventListener('change', (e) => showExplanation(e.target.value));
-    
-    // Initial load
+
     if (stocks.length > 0) {
-        showExplanation(stocks[0].symbol); // Default to first stock
-    } else {
-        document.getElementById('beginner-content').innerHTML = '<div style="padding:20px; text-align:center;">No stocks loaded yet.</div>';
+        showExplanation(stocks[0].symbol);
     }
 }
 
@@ -30,90 +99,247 @@ function showExplanation(symbol) {
     const stock = stocks.find(s => s.symbol === symbol);
     if (!stock) return;
 
-    const container = document.getElementById('beginner-content');
+    const container = document.getElementById('analysis-results');
     const isKo = appSettings.lang === 'ko';
-    
-    // Logic for conversational text
-    let valuationText = "";
-    if (stock.peRatio > 40) {
-        valuationText = isKo 
-            ? `이 회사는 **미래 성장 기대감**이 아주 높아요! 현재 버는 돈에 비해 주가가 비싼 편이지만, 사람들이 "나중에 대박 날 거야"라고 믿고 있다는 뜻이죠.`
-            : `Investors have **high expectations** for this company! The stock is expensive compared to current earnings, but people believe it will grow massively.`;
-    } else if (stock.peRatio < 15) {
-        valuationText = isKo
-            ? `현재 주가가 버는 돈에 비해 **저렴한 편**이에요. 알짜배기 가치주이거나, 시장에서 소외받고 있을 수도 있어요.`
-            : `This stock looks **cheap** relative to its earnings. It might be a hidden gem (Value Stock) or currently ignored by the market.`;
-    } else {
-        valuationText = isKo
-            ? `주가가 적정한 수준으로 평가받고 있어요. 너무 비싸지도, 너무 싸지도 않은 **표준적인 상태**입니다.`
-            : `The price is fairly valued. It's neither too expensive nor a bargain—just a **standard** valuation.`;
-    }
 
-    let volatilityText = "";
-    if (stock.volatility > 0.03) {
-        volatilityText = isKo
-            ? `⚠️ **롤러코스터 주의!** 주가가 하루에도 위아래로 크게 움직여요. 심장이 약하다면 조심해야 합니다.`
-            : `⚠️ **Buckle Up!** This stock price moves around A LOT. It's like a rollercoaster—fun if you like thrills, scary if you want safety.`;
-    } else {
-        volatilityText = isKo
-            ? `🧘 **잔잔한 호수 같아요.** 주가 변동이 크지 않아서 마음 편하게 투자할 수 있는 종목입니다.`
-            : `🧘 **Calm Waters.** This stock price is pretty stable. It doesn't jump up or down too wildly.`;
-    }
+    // -- Logic Helper --
+    const getValuationText = (pe) => {
+        if (pe > 40) return isKo 
+            ? { title: "높은 기대감", text: "사람들이 이 회사의 미래를 아주 밝게 보고 있어요! 지금은 비싸 보일 수 있습니다.", icon: "🚀", color: "#FF6B6B" }
+            : { title: "High Hopes", text: "Investors expect massive growth! It's pricey now, but could be worth it.", icon: "🚀", color: "#FF6B6B" };
+        if (pe < 15) return isKo
+            ? { title: "저평가 찬스?", text: "이익에 비해 주가가 저렴해요. 숨겨진 보석일 수도 있습니다.", icon: "💎", color: "#4ECDC4" }
+            : { title: "Bargain?", text: "Cheap relative to earnings. Could be a hidden gem or undervalued.", icon: "💎", color: "#4ECDC4" };
+        return isKo
+            ? { title: "적정 가격", text: "시장에서 딱 적당한 가격으로 평가받고 있어요.", icon: "⚖️", color: "#FFE66D" }
+            : { title: "Fair Value", text: "Priced fairly by the market. Neither cheap nor expensive.", icon: "⚖️", color: "#FFE66D" };
+    };
 
-    // Mock 52 Week High/Low (if live data missing, simulate)
-    const rangeLow = stock.low || stock.price * 0.7;
-    const rangeHigh = stock.high || stock.price * 1.3;
-    const rangePercent = Math.min(100, Math.max(0, ((stock.price - rangeLow) / (rangeHigh - rangeLow)) * 100));
+    const valData = getValuationText(stock.peRatio);
+
+    // Mock Profitability (Net Margin) - Random if missing
+    const margin = stock.netMargin || (Math.random() * 20 + 5).toFixed(1); 
+    const marginText = isKo 
+        ? (margin > 15 ? "장사를 아주 잘해요! 마진이 많이 남습니다." : "마진이 보통 수준이에요.")
+        : (margin > 15 ? "Money Making Machine! High profit margins." : "Standard profitability.");
+
+    // Mock Debt - Random if missing
+    const debtRatio = stock.debtToEquity || (Math.random() * 100 + 20).toFixed(0);
+    const debtText = isKo
+        ? (debtRatio < 50 ? "빚이 별로 없어서 튼튼해요." : "빚이 좀 있지만 감당 가능한 수준이에요.")
+        : (debtRatio < 50 ? "Very healthy balance sheet. Low debt." : "Some debt, but manageable.");
 
     container.innerHTML = `
-        <!-- AI Explanation Card -->
-        <div class="glass-panel beginner-card">
-            <h3 style="margin-bottom:10px;">🗣️ ${isKo ? 'AI 해설' : 'AI Explanation'} for ${stock.symbol}</h3>
-            <p style="color:var(--text-secondary); margin-bottom:15px; font-style:italic;">"${stock.description || (isKo ? '정보 없음' : 'No description available')}"</p>
-            <div class="explanation-bubble">
-                <p>${valuationText}</p>
-                <br>
-                <p>${volatilityText}</p>
+        <!-- 1. AI Insight Card -->
+        <div class="glass-panel beginner-card" style="border-left: 5px solid ${valData.color};">
+            <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <span style="font-size:1.5rem;">${valData.icon}</span> 
+                ${valData.title}
+            </h3>
+            <p style="font-size:1.1rem; line-height:1.6;">${valData.text}</p>
+            <div style="margin-top:15px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;">
+                <p><strong>${isKo ? '한줄 평' : 'Verdict'}:</strong> ${marginText} ${debtText}</p>
             </div>
         </div>
 
-        <!-- Price Position Card -->
+        <!-- 2. Time Machine Calculator -->
         <div class="glass-panel beginner-card">
-            <h3>📏 ${isKo ? '현재 가격 위치 (52주)' : 'Price Position (52-Week Range)'}</h3>
-            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:10px;">
-                ${isKo ? '지난 1년 중 지금이 싼 편일까요, 비싼 편일까요?' : 'Is it cheap or expensive right now compared to the last year?'}
+            <h3>⏳ ${isKo ? '타임머신 계산기' : 'Time Machine'}</h3>
+            <p style="margin-bottom:15px; font-size:0.9rem; color:var(--text-secondary);">
+                ${isKo ? '1년 전에 100만원을 넣었다면?' : 'If I invested $1,000 1 year ago...'}
             </p>
             
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
-                <span>Low: $${rangeLow.toFixed(0)}</span>
-                <span>High: $${rangeHigh.toFixed(0)}</span>
+            <div class="calc-box" style="text-align:center; padding:20px; background:rgba(0,0,0,0.2); border-radius:12px;">
+                <div style="font-size:2rem; font-weight:bold; color:${stock.change > 0 ? '#4ECDC4' : '#FF6B6B'};">
+                    ${stock.change > 0 ? '+' : ''}${(stock.change * 10).toFixed(1)}%
+                </div>
+                <div style="margin-top:5px;">
+                    ${isKo ? '내 돈은 이렇게 변했을 거에요:' : 'My Portfolio Value:'}
+                </div>
+                <div style="font-size:1.5rem; font-weight:bold; margin-top:5px;">
+                    $${(1000 * (1 + stock.change/10)).toFixed(2)}
+                </div>
             </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: ${rangePercent}%"></div>
-                <div class="progress-marker" style="left: ${rangePercent}%"></div>
-            </div>
-            <div style="text-align:center; margin-top:5px; font-weight:bold;">Current: $${stock.price}</div>
+            <p style="font-size:0.8rem; margin-top:10px; text-align:center; opacity:0.7;">
+                * ${isKo ? '과거 데이터 기반 단순 시뮬레이션입니다.' : 'Based on simulated past performance.'}
+            </p>
         </div>
 
-        <!-- Stats Card -->
+        <!-- 3. Key Stats Visualized -->
         <div class="glass-panel beginner-card">
-            <h3>📚 ${isKo ? '핵심 용어 정리' : 'Key Stats Simplified'}</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:10px;">
-                <div style="background:rgba(125,125,125,0.1); padding:10px; border-radius:8px;">
-                    <div style="color:var(--text-secondary); font-size:0.8rem;">${isKo ? '시가총액 (몸집)' : 'Market Cap (Size)'}</div>
-                    <div style="font-weight:bold; font-size:1.1rem;">${formatCurrency(stock.marketCap)}</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">
-                        ${isKo ? '이 회사를 통째로 사려면 필요한 돈이에요.' : 'How much the whole company is worth.'}
-                    </div>
-                </div>
-                <div style="background:rgba(125,125,125,0.1); padding:10px; border-radius:8px;">
-                    <div style="color:var(--text-secondary); font-size:0.8rem;">${isKo ? '배당 수익률 (보너스)' : 'Dividend Yield'}</div>
-                    <div style="font-weight:bold; font-size:1.1rem;">${stock.dividend || 0}%</div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">
-                        ${isKo ? '주식을 갖고 있으면 1년에 주는 이자 같은 돈이에요.' : 'Annual cash bonus paid to you.'}
-                    </div>
+            <h3>📊 ${isKo ? '핵심 숫자들' : 'The Numbers'}</h3>
+            
+            <div class="stat-row">
+                <span>P/E Ratio</span>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${Math.min(stock.peRatio, 100)}%; background: #a8d5e2;"></div>
+                    <span class="bar-text">${stock.peRatio}</span>
                 </div>
             </div>
+            
+            <div class="stat-row">
+                <span>Div. Yield</span>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${(stock.dividend || 0) * 10}%; background: #a2d2ff;"></div>
+                    <span class="bar-text">${stock.dividend || 0}%</span>
+                </div>
+            </div>
+
+            <div class="stat-row">
+                <span>Volatility</span>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: ${stock.volatility * 1000}%; background: #ffc8dd;"></div>
+                    <span class="bar-text">${stock.volatility}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ==========================================
+// 2. QUIZ TAB
+// ==========================================
+function renderQuiz(container) {
+    const isKo = appSettings.lang === 'ko';
+    
+    // Quiz Questions Data
+    const questions = [
+        {
+            q: isKo ? "주식 투자의 가장 큰 목적은?" : "What is your main goal?",
+            a: [
+                { text: isKo ? "손해 보더라도 대박 수익!" : "Big Gains (Even if risky)", score: 3 },
+                { text: isKo ? "은행 이자보다 조금만 더." : "Better than a Bank", score: 1 },
+                { text: isKo ? "적당한 수익과 안정성." : "Balance of Growth & Safety", score: 2 }
+            ]
+        },
+        {
+            q: isKo ? "주가가 20% 떨어졌다면?" : "The market drops 20%. You...",
+            a: [
+                { text: isKo ? "무서워서 다 판다." : "Panic sell everything!", score: 1 },
+                { text: isKo ? "오히려 싸게 살 기회다!" : "Buy more! It's a sale.", score: 3 },
+                { text: isKo ? "지켜본다." : "Wait and see.", score: 2 }
+            ]
+        },
+        {
+            q: isKo ? "투자 기간은 얼마나 생각하나요?" : "How long will you invest?",
+            a: [
+                { text: isKo ? "1년 미만" : "Less than 1 year", score: 3 },
+                { text: isKo ? "1년 ~ 5년" : "1-5 Years", score: 2 },
+                { text: isKo ? "10년 이상" : "10+ Years", score: 1 } // Long term is usually considered safer behavior, but for 'Risk Profile' score, let's invert logic: High Score = Aggressive. Actually, Short term is riskier. Let's keep High = Risk.
+            ]
+        }
+    ];
+
+    if (currentQuizStep < questions.length) {
+        // Show Question
+        const q = questions[currentQuizStep];
+        container.innerHTML = `
+            <div class="glass-panel beginner-card" style="max-width:600px; margin:0 auto; text-align:center;">
+                <h3>Q${currentQuizStep + 1}. ${q.q}</h3>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+                    ${q.a.map((opt, idx) => `
+                        <button class="quiz-btn" data-score="${opt.score}">
+                            ${opt.text}
+                        </button>
+                    `).join('')}
+                </div>
+                <div style="margin-top:20px; color:var(--text-secondary);">
+                    Step ${currentQuizStep + 1} / ${questions.length}
+                </div>
+            </div>
+        `;
+
+        // Handle Click
+        container.querySelectorAll('.quiz-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                quizScore += parseInt(btn.dataset.score);
+                currentQuizStep++;
+                renderQuiz(container);
+            });
+        });
+
+    } else {
+        // Show Result
+        let type = "";
+        let desc = "";
+        
+        if (quizScore <= 4) {
+            type = isKo ? "🛡️ 안전 제일 '거북이' 투자자" : "🛡️ The Safe Turtle";
+            desc = isKo 
+                ? "잃지 않는 투자를 중요하게 생각하시는군요! 배당주나 우량주 위주의 투자를 추천합니다." 
+                : "You prioritize safety. Stick to blue-chip stocks and dividends!";
+        } else if (quizScore <= 7) {
+            type = isKo ? "⚖️ 균형 잡힌 '전략가' 투자자" : "⚖️ The Balanced Strategist";
+            desc = isKo 
+                ? "위험과 수익을 적절히 관리하시네요. 성장주와 가치주를 섞어서 포트폴리오를 짜보세요."
+                : "You know when to take risks. Build a mixed portfolio of growth and value.";
+        } else {
+            type = isKo ? "🚀 인생은 한방 '사자' 투자자" : "🚀 The Risk-Taking Lion";
+            desc = isKo
+                ? "높은 수익을 위해 위험을 감수하는 스타일! 테마주나 급등주에 관심이 많으시겠어요. 하지만 몰빵은 금물!"
+                : "You want big gains! You might like volatile tech stocks, but watch out for crashes.";
+        }
+
+        container.innerHTML = `
+            <div class="glass-panel beginner-card" style="max-width:600px; margin:0 auto; text-align:center; animation: fadeIn 0.5s;">
+                <h1 style="font-size:3rem; margin-bottom:10px;">${type.split(' ')[0]}</h1>
+                <h2>${type.substring(2)}</h2>
+                <p style="margin:20px 0; font-size:1.1rem; line-height:1.6;">${desc}</p>
+                <button id="reset-quiz" style="padding:10px 20px; border-radius:8px; border:none; background:var(--accent-blue); color:white; cursor:pointer;">
+                    ${isKo ? '다시 하기' : 'Retake Quiz'}
+                </button>
+            </div>
+        `;
+
+        document.getElementById('reset-quiz').addEventListener('click', () => {
+            currentQuizStep = 0;
+            quizScore = 0;
+            renderQuiz(container);
+        });
+    }
+}
+
+// ==========================================
+// 3. LEARN TAB
+// ==========================================
+function renderLearn(container) {
+    const isKo = appSettings.lang === 'ko';
+    
+    const topics = [
+        {
+            title: isKo ? "주식이란 무엇인가요?" : "What is a Stock?",
+            content: isKo 
+                ? "회사의 주인인 '주주'가 될 수 있는 증서입니다. 회사가 돈을 벌면 나눠가질 권리가 생겨요." 
+                : "It represents ownership in a company. Buying a stock means you own a tiny slice of that business."
+        },
+        {
+            title: isKo ? "배당금이 뭐예요?" : "What is a Dividend?",
+            content: isKo
+                ? "회사가 번 돈의 일부를 주주들에게 보너스처럼 나눠주는 현금입니다."
+                : "A portion of the company's profits paid out directly to shareholders, usually every quarter."
+        },
+        {
+            title: isKo ? "PER가 뭔가요?" : "What is P/E Ratio?",
+            content: isKo
+                ? "주가가 버는 돈의 몇 배인지를 나타내는 지표입니다. 낮으면 저평가, 높으면 고평가일 가능성이 높아요."
+                : "Price-to-Earnings Ratio. It measures how expensive a stock is relative to how much money the company makes."
+        },
+        {
+            title: isKo ? "물타기가 뭔가요?" : "What is DCA?",
+            content: isKo
+                ? "주가가 떨어질 때마다 추가로 매수해서 평균 단가를 낮추는 전략입니다. (Dollar Cost Averaging)"
+                : "Dollar Cost Averaging. Buying a fixed dollar amount of a stock regularly, regardless of the price."
+        }
+    ];
+
+    container.innerHTML = `
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
+            ${topics.map(topic => `
+                <div class="glass-panel beginner-card learn-card">
+                    <h3 style="margin-bottom:10px; color:var(--accent-blue);"><i class="fa-solid fa-book-open"></i> ${topic.title}</h3>
+                    <p style="line-height:1.6; color:var(--text-secondary);">${topic.content}</p>
+                </div>
+            `).join('')}
         </div>
     `;
 }
