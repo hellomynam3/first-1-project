@@ -32,10 +32,23 @@ export function renderSettings(container, onUpdate) {
                     <i class="fa-solid fa-key"></i> ${t.apikey_label}
                 </div>
                 <div style="width: 100%;">
-                    <input type="text" id="api-key-input" value="${appSettings.finnhubKey}" placeholder="Paste your API key here..." 
+                    <input type="text" id="api-key-input" value="${appSettings.finnhubKey}" placeholder="Paste your Finnhub API key here..." 
                            style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; outline: none;">
                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
                         ${t.apikey_desc}
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div style="font-size: 1.1rem;">
+                    <i class="fa-solid fa-robot"></i> ${t.gemini_apikey_label}
+                </div>
+                <div style="width: 100%;">
+                    <input type="text" id="gemini-key-input" value="${appSettings.geminiKey}" placeholder="Paste your Gemini API key here..." 
+                           style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; outline: none;">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+                        ${t.gemini_apikey_desc}
                     </div>
                 </div>
             </div>
@@ -64,8 +77,9 @@ export function renderSettings(container, onUpdate) {
 
     // Save Button
     document.getElementById('save-settings-btn').addEventListener('click', () => {
-        const key = document.getElementById('api-key-input').value.trim();
-        saveSettings({ finnhubKey: key });
+        const finnhubKey = document.getElementById('api-key-input').value.trim();
+        const geminiKey = document.getElementById('gemini-key-input').value.trim();
+        saveSettings({ finnhubKey, geminiKey });
         alert(appSettings.lang === 'ko' ? "설정이 저장되었습니다. 데이터를 새로 고침합니다." : "Settings saved. Refreshing data...");
         location.reload(); // Refresh to fetch new live data
     });

@@ -74,7 +74,9 @@ export const translations = {
         theme_label: "App Theme",
         lang_label: "Language",
         apikey_label: "Finnhub API Key",
+        gemini_apikey_label: "Gemini API Key (Optional)",
         apikey_desc: "Get a free key at finnhub.io",
+        gemini_apikey_desc: "Get a free key at aistudio.google.com for smarter chat",
         btn_save: "Save Settings",
         mcap: "MCap",
         per: "P/E",
@@ -113,7 +115,9 @@ export const translations = {
         theme_label: "앱 테마",
         lang_label: "언어 설정",
         apikey_label: "Finnhub API 키",
+        gemini_apikey_label: "Gemini API 키 (선택)",
         apikey_desc: "finnhub.io에서 무료 키를 발급받으세요",
+        gemini_apikey_desc: "스마트 채팅을 위해 aistudio.google.com에서 무료 키를 받으세요",
         btn_save: "설정 저장",
         mcap: "시총",
         per: "PER",
@@ -137,7 +141,8 @@ export const translations = {
 export let appSettings = {
     theme: localStorage.getItem('theme') || 'dark',
     lang: localStorage.getItem('lang') || 'en',
-    finnhubKey: localStorage.getItem('finnhubKey') || ''
+    finnhubKey: localStorage.getItem('finnhubKey') || '',
+    geminiKey: localStorage.getItem('geminiKey') || ''
 };
 
 export function saveSettings(newSettings) {
@@ -146,5 +151,8 @@ export function saveSettings(newSettings) {
     localStorage.setItem('lang', appSettings.lang);
     if (newSettings.finnhubKey !== undefined) {
         localStorage.setItem('finnhubKey', appSettings.finnhubKey);
+    }
+    if (newSettings.geminiKey !== undefined) {
+        localStorage.setItem('geminiKey', appSettings.geminiKey);
     }
 }
