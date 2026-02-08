@@ -41,7 +41,15 @@ export function initChatbot() {
                 const aiResponse = await fetchGeminiResponse(text);
                 loadingDiv.textContent = aiResponse; // Replace "Thinking..." with actual response
             } catch (e) {
-                loadingDiv.textContent = "Error connecting to AI. Using basic mode.";
+                console.error("Gemini API Error:", e); // Log for debugging
+                let errorMsg = "AI Connection Failed.";
+                
+                if (e.message.includes("400")) errorMsg += " (Bad Request - Check Key)";
+                else if (e.message.includes("401") || e.message.includes("403")) errorMsg += " (Invalid API Key)";
+                else if (e.message.includes("429")) errorMsg += " (Rate Limit)";
+                
+                loadingDiv.textContent = `${errorMsg} Switching to basic mode.`;
+                
                 // Fallback if API fails
                 setTimeout(() => {
                     const response = generateResponse(text);
