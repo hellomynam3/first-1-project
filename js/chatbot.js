@@ -1,4 +1,5 @@
 import { appSettings } from './store.js';
+import { fetchGeminiAnalysis } from './api.js';
 
 export function initChatbot() {
     const fab = document.getElementById('chat-fab');
@@ -38,8 +39,10 @@ export function initChatbot() {
             const loadingDiv = appendMessage("Thinking...", 'bot');
             
             try {
-                const aiResponse = await fetchGeminiResponse(text);
-                loadingDiv.textContent = aiResponse; // Replace "Thinking..." with actual response
+                // Construct a chat-specific prompt
+                const prompt = `You are a helpful and concise stock market assistant for beginners. Keep answers short (under 3 sentences) and avoid using markdown formatting like bolding or lists. User asks: ${text}`;
+                const aiResponse = await fetchGeminiAnalysis(prompt);
+                loadingDiv.textContent = aiResponse; 
             } catch (e) {
                 console.error("Gemini API Error:", e); // Log for debugging
                 let errorMsg = "AI Connection Failed.";
@@ -72,35 +75,6 @@ export function initChatbot() {
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
         return div; // Return the element so we can update it later
-    }
-}
-
-async function fetchGeminiResponse(userMessage) {
-    const apiKey = appSettings.geminiKey;
-    // using gemini-1.5-flash for speed and cost efficiency
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const payload = {
-        contents: [{
-            parts: [{ text: `You are a helpful and concise stock market assistant for beginners. Keep answers short (under 3 sentences) and avoid using markdown formatting like bolding or lists. User asks: ${userMessage}` }]
-        }]
-    };
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (data.candidates && data.candidates.length > 0) {
-        return data.candidates[0].content.parts[0].text;
-    } else {
-        return "I'm not sure how to answer that right now.";
     }
 }
 

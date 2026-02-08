@@ -116,3 +116,35 @@ export async function fetchStockDetails(symbol) {
         return null;
     }
 }
+
+// Gemini AI Analysis
+export async function fetchGeminiAnalysis(prompt) {
+    const apiKey = appSettings.geminiKey;
+    if (!apiKey || apiKey.length < 10) throw new Error("Gemini API Key Missing or Invalid");
+
+    // using gemini-1.5-flash for speed and cost efficiency
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const payload = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }]
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.candidates && data.candidates.length > 0) {
+        return data.candidates[0].content.parts[0].text;
+    } else {
+        return "I'm not sure how to answer that right now.";
+    }
+}

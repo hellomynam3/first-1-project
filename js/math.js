@@ -47,3 +47,28 @@ export function calculateRSI(prices, period = 14) {
     const rs = avgGain / (avgLoss || 1); // Avoid div by zero
     return 100 - (100 / (1 + rs));
 }
+
+// Simple Moving Average (SMA)
+export function calculateSMA(prices, period) {
+    if (prices.length < period) return null;
+    const sum = prices.slice(0, period).reduce((a, b) => a + b, 0);
+    return sum / period;
+}
+
+// Bollinger Bands (SMA +/- 2 * StdDev)
+export function calculateBollingerBands(prices, period = 20) {
+    if (prices.length < period) return null;
+    
+    const sma = calculateSMA(prices, period);
+    const slice = prices.slice(0, period);
+    
+    const squaredDiffs = slice.map(p => Math.pow(p - sma, 2));
+    const variance = squaredDiffs.reduce((a, b) => a + b, 0) / period;
+    const stdDev = Math.sqrt(variance);
+
+    return {
+        upper: sma + (2 * stdDev),
+        middle: sma,
+        lower: sma - (2 * stdDev)
+    };
+}
