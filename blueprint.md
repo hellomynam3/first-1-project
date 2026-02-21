@@ -8,6 +8,8 @@ A comprehensive stock analysis platform combining the intuitiveness of **Toss Se
 ### 1. 🏠 Main Dashboard (Market Command Center)
 - **Glassmorphism Design:** Modern, translucent UI.
 - **Market Status:** Real-time NY Market Open/Close status.
+- **Major Indices Detail:** Clickable index cards (S&P 500, Nasdaq, BTC) showing full technical details and forecasts.
+- **Real-time Updates:** Auto-refreshing data every 10 seconds with live simulation for demo mode.
 - **Mini Indicators:** Sparklines for S&P 500, Nasdaq, BTC, etc.
 - **Watchlist:** Visual cards with color-coded price changes.
 - **Sentiment News:** AI-analyzed news (Green/Red borders).

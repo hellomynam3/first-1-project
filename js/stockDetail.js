@@ -48,19 +48,19 @@ export function renderStockDetail(container, symbol, onBack) {
                     <div class="dashboard-grid">
                         <div class="glass-panel mini-card">
                             <h3>Market Cap</h3>
-                            <div class="value" style="font-size: 1.2rem;">${formatCurrency(stock.marketCap)}</div>
+                            <div class="value" style="font-size: 1.2rem;">${stock.marketCap ? formatCurrency(stock.marketCap) : 'N/A'}</div>
                         </div>
                         <div class="glass-panel mini-card">
                             <h3>P/E Ratio</h3>
-                            <div class="value" style="font-size: 1.2rem;">${stock.peRatio}</div>
+                            <div class="value" style="font-size: 1.2rem;">${stock.peRatio || 'N/A'}</div>
                         </div>
                         <div class="glass-panel mini-card">
                             <h3>Dividend</h3>
-                            <div class="value" style="font-size: 1.2rem;">${stock.dividend}%</div>
+                            <div class="value" style="font-size: 1.2rem;">${stock.dividend !== undefined ? stock.dividend + '%' : 'N/A'}</div>
                         </div>
                          <div class="glass-panel mini-card">
                             <h3>Analyst Rating</h3>
-                            <div class="value" style="font-size: 1.1rem; color: var(--accent-yellow)">${stock.analystRating}</div>
+                            <div class="value" style="font-size: 1.1rem; color: var(--accent-yellow)">${stock.analystRating || 'Neutral'}</div>
                         </div>
                     </div>
                 </div>
@@ -70,7 +70,7 @@ export function renderStockDetail(container, symbol, onBack) {
                     <div class="glass-panel" style="padding: 20px;">
                         <div class="section-title"><i class="fa-solid fa-brain"></i> AI Analysis</div>
                         <p style="margin-bottom: 10px; font-size: 0.9rem;">
-                            <strong>Profitability:</strong> ROE is ${stock.roe}%, indicating ${stock.roe > 15 ? 'high' : 'moderate'} efficiency.<br>
+                            <strong>Profitability:</strong> ${stock.roe ? `ROE is ${stock.roe}%, indicating ${stock.roe > 15 ? 'high' : 'moderate'} efficiency.` : 'Data not available for this asset type.'}<br>
                             <strong>Risk:</strong> Volatility is ${(stock.volatility * 100).toFixed(1)}%, which is considered ${stock.volatility > 0.03 ? 'high' : 'stable'}.
                         </p>
                     </div>

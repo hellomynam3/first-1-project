@@ -112,6 +112,7 @@ function renderIndices() {
         
         const card = document.createElement('div');
         card.className = 'glass-panel mini-card';
+        card.style.cursor = 'pointer';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:start;">
                 <div>
@@ -124,6 +125,11 @@ function renderIndices() {
                 </div>
             </div>
         `;
+
+        card.addEventListener('click', () => {
+            if (onStockClick) onStockClick(idx.symbol);
+        });
+
         container.appendChild(card);
         renderSparkline(`chart-${idx.symbol}`, chartColor);
     });
