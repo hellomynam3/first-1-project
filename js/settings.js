@@ -63,6 +63,23 @@ export function renderSettings(container, onUpdate) {
                 Stock AI Master v1.3.0 (Live API Ready)
             </div>
         </div>
+
+        <!-- Help Section -->
+        <div class="settings-container glass-panel" style="margin-top: 20px; padding: 30px;">
+            <h2 class="section-title"><i class="fa-solid fa-circle-question"></i> ${appSettings.lang === 'ko' ? '실시간 연동 도움말' : 'Real-time Setup Guide'}</h2>
+            <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary);">
+                <p>${appSettings.lang === 'ko' ? '실시간 주가 데이터를 받으려면 다음 단계를 따르세요:' : 'Follow these steps to enable real-time stock prices:'}</p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li><a href="https://finnhub.io/" target="_blank" style="color: var(--accent-blue); text-decoration: none;">Finnhub.io</a>${appSettings.lang === 'ko' ? '에 접속하여 무료 계정을 만듭니다.' : ' - Sign up for a free account.'}</li>
+                    <li>${appSettings.lang === 'ko' ? '대시보드에서 <strong>API Key</strong>를 복사합니다.' : 'Copy your <strong>API Key</strong> from the Finnhub dashboard.'}</li>
+                    <li>${appSettings.lang === 'ko' ? '위의 <strong>Finnhub API 키</strong> 필드에 붙여넣고 <strong>설정 저장</strong>을 클릭합니다.' : 'Paste it into the <strong>Finnhub API Key</strong> field above and click <strong>Save</strong>.'}</li>
+                    <li>${appSettings.lang === 'ko' ? '페이지가 새로고침되면 "LIVE" 표시와 함께 실제 주가가 반영됩니다.' : 'The page will reload, and "LIVE" badges will appear with real data.'}</li>
+                </ol>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid var(--accent-blue); font-size: 0.85rem;">
+                    <strong>Note:</strong> ${appSettings.lang === 'ko' ? '무료 티어는 분당 60회의 호출 제한이 있습니다. 이 앱은 효율적인 사용을 위해 페이지 로드 시 데이터를 한 번 가져오도록 최적화되어 있습니다.' : 'The free tier allows 60 calls/min. This app fetches data on load to stay within limits.'}
+                </div>
+            </div>
+        </div>
     `;
 
     // Toggle Buttons
