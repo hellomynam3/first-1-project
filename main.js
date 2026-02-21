@@ -77,7 +77,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 1. Local Search first
             let matches = stocks.filter(s => 
                 s.symbol.toLowerCase().includes(query) || 
-                s.name.toLowerCase().includes(query)
+                s.name.toLowerCase().includes(query) ||
+                (s.sector && s.sector.toLowerCase().includes(query))
             ).map(s => ({...s, isLocal: true}));
 
             // 2. API Search (if key exists)
@@ -227,33 +228,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateNavText();
     loadView('dashboard');
     initChatbot();
-
-    // --- Real-time Auto Refresh ---
-    setInterval(async () => {
-        // Only refresh if on Dashboard or Stock Detail to avoid disrupting other tools
-        const activeLink = document.querySelector('.nav-links li.active');
-        const currentView = activeLink ? activeLink.dataset.view : '';
-        
-        // If contentArea has focused elements (like inputs), skip refresh to avoid losing focus
-        const hasFocusedInput = contentArea.querySelector('input:focus');
-        if (hasFocusedInput) return;
-
-        if (currentView === 'dashboard' || currentView === 'stock-detail') {
-            console.log("Refreshing live data...");
-            const data = await fetchMarketData();
-            initializeStore(data);
-            
-            // Re-render current view with new data
-            if (currentView === 'dashboard') {
-                renderDashboard(contentArea, handleStockClick, handleNewsClick);
-            } else if (currentView === 'stock-detail') {
-                // Get current symbol from some state or by checking what's rendered
-                // In this app, we can find the symbol from the detail page header if it exists
-                const detailSymbol = contentArea.querySelector('.stock-badge')?.textContent.split(' ')[0];
-                if (detailSymbol) {
-                    renderStockDetail(contentArea, detailSymbol, () => loadView('dashboard'));
-                }
-            }
-        }
-    }, 10000); // Refresh every 10 seconds
 });
