@@ -41,9 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             case 'dashboard':
                 renderDashboard(contentArea, handleStockClick, handleNewsClick);
                 break;
-            case 'simulator':
-                renderSimulator(contentArea);
-                break;
             case 'beginner':
                 renderBeginner(contentArea);
                 break;

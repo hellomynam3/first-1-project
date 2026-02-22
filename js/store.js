@@ -56,7 +56,6 @@ export function removeFromWatchlist(symbol) {
 export const translations = {
     en: {
         nav_dashboard: "Dashboard",
-        nav_quant: "Quant Tool",
         nav_easy: "Easy Mode",
         nav_settings: "Settings",
         market_open: "US Market is Open",
@@ -97,7 +96,6 @@ export const translations = {
     },
     ko: {
         nav_dashboard: "대시보드",
-        nav_quant: "퀀트 분석",
         nav_easy: "초보자 모드",
         nav_settings: "설정",
         market_open: "미국장 개장",
