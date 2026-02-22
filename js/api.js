@@ -122,9 +122,8 @@ export async function fetchGeminiAnalysis(prompt) {
     const apiKey = appSettings.geminiKey;
     if (!apiKey || apiKey.length < 10) throw new Error("Gemini API Key Missing or Invalid");
 
-    // using gemini-1.5-flash for speed and cost efficiency
-    // Update to v1 for stability
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Using v1beta as gemini-1.5-flash is currently more stable there
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const payload = {
         contents: [{
@@ -142,6 +141,7 @@ export async function fetchGeminiAnalysis(prompt) {
         if (!response.ok) {
             const errData = await response.json();
             console.error("Gemini API Error details:", errData);
+            // If 404 persists with 1.5-flash, fallback or inform
             throw new Error(`API Error: ${response.status} - ${errData.error?.message || 'Unknown Error'}`);
         }
 
