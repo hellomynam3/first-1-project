@@ -40,7 +40,7 @@ export function renderBeginner(container) {
         btn.addEventListener('click', (e) => {
             // Update UI
             buttons.forEach(b => b.classList.remove('active'));
-            const target = e.currentTarget; // Use currentTarget to get the button element reliably
+            const target = e.currentTarget; 
             target.classList.add('active');
             
             // Update State & Render
@@ -102,32 +102,50 @@ function showExplanation(symbol) {
     const container = document.getElementById('analysis-results');
     const isKo = appSettings.lang === 'ko';
 
-    // -- Logic Helper --
-    const getValuationText = (pe) => {
-        if (pe > 40) return isKo 
-            ? { title: "높은 기대감", text: "사람들이 이 회사의 미래를 아주 밝게 보고 있어요! 지금은 비싸 보일 수 있습니다.", icon: "🚀", color: "#FF6B6B" }
-            : { title: "High Hopes", text: "Investors expect massive growth! It's pricey now, but could be worth it.", icon: "🚀", color: "#FF6B6B" };
-        if (pe < 15) return isKo
-            ? { title: "저평가 찬스?", text: "이익에 비해 주가가 저렴해요. 숨겨진 보석일 수도 있습니다.", icon: "💎", color: "#4ECDC4" }
-            : { title: "Bargain?", text: "Cheap relative to earnings. Could be a hidden gem or undervalued.", icon: "💎", color: "#4ECDC4" };
+    // -- Enhanced Logic Helper for Diversity --
+    const getValuationText = (stock) => {
+        const pe = stock.peRatio;
+        const vol = stock.volatility;
+        const change = stock.change;
+
+        if (pe > 50) {
+            if (vol > 0.04) return isKo 
+                ? { title: "초고속 성장 기대주", text: "변동성이 크고 기대감이 엄청나요! 하이 리스크 하이 리턴의 정석입니다.", icon: "🚀", color: "#d946ef" }
+                : { title: "Hyper Growth", text: "Massive expectations and high volatility! A classic high-risk, high-reward play.", icon: "🚀", color: "#d946ef" };
+            return isKo 
+                ? { title: "높은 프리미엄", text: "시장이 이 주식의 미래에 비싼 값을 매겼어요. 성장이 계속되어야 주가가 유지됩니다.", icon: "🔥", color: "#FF6B6B" }
+                : { title: "High Hopes", text: "Investors are paying a premium for future growth. It needs to keep winning!", icon: "🔥", color: "#FF6B6B" };
+        }
+        
+        if (pe < 12) {
+            if (change < -5) return isKo
+                ? { title: "위기인가 기회인가", text: "최근 주가가 많이 빠졌고 가격도 저렴해요. 반등을 기다리는 전략이 필요할지도?", icon: "⚠️", color: "#f59e0b" }
+                : { title: "Crisis or Chance?", text: "Price dropped recently and valuation is low. Is a rebound coming?", icon: "⚠️", color: "#f59e0b" };
+            return isKo
+                ? { title: "저평가된 보석", text: "이익에 비해 주가가 참 착해요. 안정적인 투자를 원하는 분들께 매력적일 수 있습니다.", icon: "💎", color: "#4ECDC4" }
+                : { title: "Hidden Gem", text: "Very cheap relative to earnings. Attractive for value-seeking investors.", icon: "💎", color: "#4ECDC4" };
+        }
+
+        if (vol < 0.015) return isKo
+            ? { title: "안전한 대피소", text: "주가 움직임이 매우 점잖아요. 큰 수익보다는 자산 보존에 유리합니다.", icon: "🛡️", color: "#3b82f6" }
+            : { title: "Safe Haven", text: "Very stable price movement. Good for capital preservation, not quick wins.", icon: "🛡️", color: "#3b82f6" };
+
         return isKo
-            ? { title: "적정 가격", text: "시장에서 딱 적당한 가격으로 평가받고 있어요.", icon: "⚖️", color: "#FFE66D" }
-            : { title: "Fair Value", text: "Priced fairly by the market. Neither cheap nor expensive.", icon: "⚖️", color: "#FFE66D" };
+            ? { title: "시장 평균 수준", text: "딱 적당한 온도의 주식입니다. 너무 뜨겁지도 차갑지도 않아요.", icon: "⚖️", color: "#FFE66D" }
+            : { title: "Market Standard", text: "Priced reasonably. Not too hot, not too cold. Solid baseline pick.", icon: "⚖️", color: "#FFE66D" };
     };
 
-    const valData = getValuationText(stock.peRatio);
+    const valData = getValuationText(stock);
 
-    // Mock Profitability (Net Margin) - Random if missing
-    const margin = stock.netMargin || (Math.random() * 20 + 5).toFixed(1); 
+    const margin = stock.profitMargin || 10;
     const marginText = isKo 
-        ? (margin > 15 ? "장사를 아주 잘해요! 마진이 많이 남습니다." : "마진이 보통 수준이에요.")
-        : (margin > 15 ? "Money Making Machine! High profit margins." : "Standard profitability.");
+        ? (margin > 20 ? "수익성이 괴물 수준이에요! 효율적으로 돈을 법니다." : margin > 10 ? "장사를 제법 잘하고 있어요." : "수익성은 평범한 수준입니다.")
+        : (margin > 20 ? "Efficiency monster! High profit margins." : margin > 10 ? "Doing good business." : "Average profitability.");
 
-    // Mock Debt - Random if missing
-    const debtRatio = stock.debtToEquity || (Math.random() * 100 + 20).toFixed(0);
+    const debtRatio = stock.debtRatio || 50;
     const debtText = isKo
-        ? (debtRatio < 50 ? "빚이 별로 없어서 튼튼해요." : "빚이 좀 있지만 감당 가능한 수준이에요.")
-        : (debtRatio < 50 ? "Very healthy balance sheet. Low debt." : "Some debt, but manageable.");
+        ? (debtRatio < 30 ? "지갑이 아주 튼튼해요(빚이 거의 없음)." : debtRatio < 70 ? "빚 관리를 적절히 하고 있네요." : "빚이 좀 많아서 주의가 필요해요.")
+        : (debtRatio < 30 ? "Fortress balance sheet. Almost no debt." : debtRatio < 70 ? "Debt is under control." : "High debt, needs careful watching.");
 
     container.innerHTML = `
         <!-- 1. AI Insight Card -->
@@ -138,7 +156,7 @@ function showExplanation(symbol) {
             </h3>
             <p style="font-size:1.1rem; line-height:1.6;">${valData.text}</p>
             <div style="margin-top:15px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;">
-                <p><strong>${isKo ? '한줄 평' : 'Verdict'}:</strong> ${marginText} ${debtText}</p>
+                <p><strong>${isKo ? '전문가 소견' : 'Expert View'}:</strong> ${marginText} ${debtText}</p>
             </div>
         </div>
 
@@ -202,7 +220,6 @@ function showExplanation(symbol) {
 function renderQuiz(container) {
     const isKo = appSettings.lang === 'ko';
     
-    // Quiz Questions Data
     const questions = [
         {
             q: isKo ? "주식 투자의 가장 큰 목적은?" : "What is your main goal?",
@@ -225,13 +242,12 @@ function renderQuiz(container) {
             a: [
                 { text: isKo ? "1년 미만" : "Less than 1 year", score: 3 },
                 { text: isKo ? "1년 ~ 5년" : "1-5 Years", score: 2 },
-                { text: isKo ? "10년 이상" : "10+ Years", score: 1 } // Long term is usually considered safer behavior, but for 'Risk Profile' score, let's invert logic: High Score = Aggressive. Actually, Short term is riskier. Let's keep High = Risk.
+                { text: isKo ? "10년 이상" : "10+ Years", score: 1 }
             ]
         }
     ];
 
     if (currentQuizStep < questions.length) {
-        // Show Question
         const q = questions[currentQuizStep];
         container.innerHTML = `
             <div class="glass-panel beginner-card" style="max-width:600px; margin:0 auto; text-align:center;">
@@ -249,7 +265,6 @@ function renderQuiz(container) {
             </div>
         `;
 
-        // Handle Click
         container.querySelectorAll('.quiz-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 quizScore += parseInt(btn.dataset.score);
@@ -259,7 +274,6 @@ function renderQuiz(container) {
         });
 
     } else {
-        // Show Result
         let type = "";
         let desc = "";
         
