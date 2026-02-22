@@ -53,9 +53,9 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
     `;
 
     updateMarketStatus();
-    renderIndices();
+    renderIndices(onStockClick);
     renderSectors();
-    renderPortfolio();
+    renderPortfolio(onStockClick);
     renderWatchlist(onStockClick);
     renderNews(onNewsClick);
 
@@ -66,7 +66,7 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
         const q = parseFloat(document.getElementById('port-qty').value);
         if(s && p && q) {
             addToPortfolio(s, p, q);
-            renderPortfolio();
+            renderPortfolio(onStockClick);
             // Clear inputs
             document.getElementById('port-symbol').value = '';
             document.getElementById('port-price').value = '';
@@ -100,10 +100,11 @@ function updateMarketStatus() {
     statusEl.innerHTML = `<span class="status-dot ${dotClass}"></span> ${msg}`;
 }
 
-function renderIndices() {
+function renderIndices(onStockClick) {
     const container = document.getElementById('mini-indices');
     const indices = stocks.filter(s => s.type === 'index' || s.type === 'crypto');
 
+    container.innerHTML = ''; // Clear first
     indices.forEach(idx => {
         const isUp = idx.change >= 0;
         const colorClass = isUp ? 'text-green' : 'text-red';
@@ -146,6 +147,7 @@ function renderSectors() {
         { name: 'Energy', change: 0.1 }
     ];
 
+    container.innerHTML = ''; // Clear first
     sectors.forEach(sec => {
         const isUp = sec.change >= 0;
         const color = isUp ? 'var(--accent-green)' : 'var(--accent-red)';
@@ -169,7 +171,7 @@ function renderSectors() {
     });
 }
 
-function renderPortfolio() {
+function renderPortfolio(onStockClick) {
     const container = document.getElementById('portfolio-list');
     const summary = document.getElementById('portfolio-summary');
     const t = translations[appSettings.lang];
@@ -213,6 +215,7 @@ function renderPortfolio() {
         row.style.padding = '12px 0';
         row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
         row.style.alignItems = 'center';
+        row.style.cursor = 'pointer';
         
         row.innerHTML = `
             <div style="font-weight:bold;">${p.symbol} <span style="font-size:0.8rem; color:var(--text-secondary);">x${p.quantity}</span></div>
@@ -227,6 +230,13 @@ function renderPortfolio() {
                 </button>
             </div>
         `;
+
+        row.addEventListener('click', (e) => {
+            if (!e.target.closest('.remove-port-btn')) {
+                if (onStockClick) onStockClick(p.symbol);
+            }
+        });
+
         container.appendChild(row);
     });
 
@@ -246,7 +256,7 @@ function renderPortfolio() {
         btn.addEventListener('click', (e) => {
             const sym = e.currentTarget.dataset.symbol; // Use currentTarget for button
             removeFromPortfolio(sym);
-            renderPortfolio();
+            renderPortfolio(onStockClick);
         });
     });
 }
