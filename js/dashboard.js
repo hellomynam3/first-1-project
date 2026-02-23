@@ -2,7 +2,7 @@ import { stocks, news, appSettings, translations, portfolio, watchlist, addToPor
 import { getMarketStatus, formatCurrency } from './utils.js';
 import { generateHistory } from './math.js';
 
-export function renderDashboard(container, onStockClick, onNewsClick) {
+export function renderDashboard(container, onStockClick, onNewsClick, onSeeAllNews) {
     const t = translations[appSettings.lang];
 
     container.innerHTML = `
@@ -46,8 +46,11 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
         </div>
         <div class="watchlist-grid" id="watchlist"></div>
 
-        <div class="section-title">
-            <i class="fa-regular fa-newspaper"></i> ${t.news}
+        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span><i class="fa-regular fa-newspaper"></i> ${t.news}</span>
+            <button id="see-all-news" style="background:none; border:none; color:var(--accent-blue); cursor:pointer; font-size:0.9rem;">
+                ${appSettings.lang === 'ko' ? '전체보기' : 'See All'} <i class="fa-solid fa-chevron-right"></i>
+            </button>
         </div>
         <div class="news-section" id="news-feed"></div>
     `;
@@ -60,18 +63,8 @@ export function renderDashboard(container, onStockClick, onNewsClick) {
     renderNews(onNewsClick);
 
     // Event Listeners
-    document.getElementById('btn-add-port').addEventListener('click', () => {
-        const s = document.getElementById('port-symbol').value.toUpperCase();
-        const p = parseFloat(document.getElementById('port-price').value);
-        const q = parseFloat(document.getElementById('port-qty').value);
-        if(s && p && q) {
-            addToPortfolio(s, p, q);
-            renderPortfolio(onStockClick);
-            // Clear inputs
-            document.getElementById('port-symbol').value = '';
-            document.getElementById('port-price').value = '';
-            document.getElementById('port-qty').value = '';
-        }
+    document.getElementById('see-all-news').addEventListener('click', () => {
+        if (onSeeAllNews) onSeeAllNews();
     });
 
     document.getElementById('btn-add-watch').addEventListener('click', () => {

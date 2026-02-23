@@ -2,6 +2,7 @@ import { renderDashboard } from './js/dashboard.js';
 import { renderSimulator } from './js/simulator.js';
 import { renderBeginner } from './js/beginner.js';
 import { renderSettings } from './js/settings.js';
+import { renderNewsPage } from './js/news.js';
 import { initChatbot } from './js/chatbot.js';
 import { renderStockDetail } from './js/stockDetail.js';
 import { appSettings, translations, stocks, initializeStore } from './js/store.js';
@@ -54,10 +55,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         switch(viewName) {
             case 'dashboard':
-                renderDashboard(contentArea, handleStockClick, handleNewsClick);
+                renderDashboard(contentArea, handleStockClick, handleNewsClick, () => loadView('news'));
                 break;
             case 'beginner':
                 renderBeginner(contentArea);
+                break;
+            case 'news':
+                renderNewsPage(contentArea, handleNewsClick);
                 break;
             case 'settings':
                 renderSettings(contentArea, handleSettingsUpdate);
@@ -67,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderStockDetail(contentArea, param, () => loadView('dashboard')); 
                 break;
             default:
-                renderDashboard(contentArea, handleStockClick, handleNewsClick);
+                renderDashboard(contentArea, handleStockClick, handleNewsClick, () => loadView('news'));
         }
         
         updateNavText();
@@ -182,6 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'dashboard': t.nav_dashboard,
             'simulator': t.nav_quant,
             'beginner': t.nav_easy,
+            'news': t.nav_news,
             'settings': t.nav_settings
         };
         

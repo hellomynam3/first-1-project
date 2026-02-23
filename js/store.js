@@ -57,6 +57,7 @@ export const translations = {
     en: {
         nav_dashboard: "Dashboard",
         nav_easy: "Easy Mode",
+        nav_news: "News",
         nav_settings: "Settings",
         market_open: "US Market is Open",
         market_closed: "US Market is Closed",
