@@ -343,17 +343,82 @@ function renderLearn(container) {
             content: isKo
                 ? "주가가 떨어질 때마다 추가로 매수해서 평균 단가를 낮추는 전략입니다. (Dollar Cost Averaging)"
                 : "Dollar Cost Averaging. Buying a fixed dollar amount of a stock regularly, regardless of the price."
+        },
+        {
+            title: isKo ? "ETF가 뭔가요?" : "What is an ETF?",
+            content: isKo
+                ? "여러 주식을 한 바구니에 담아 파는 상품입니다. 하나만 사도 분산 투자 효과를 볼 수 있어요."
+                : "Exchange Traded Fund. A basket of many stocks you can buy at once. Great for diversification!"
+        },
+        {
+            title: isKo ? "시가총액이 뭐예요?" : "What is Market Cap?",
+            content: isKo
+                ? "회사의 총 가치를 돈으로 환산한 것입니다. (주식 수 × 현재 주가)"
+                : "Total value of a company. (Number of shares × Stock price). Bigger means more established."
+        },
+        {
+            title: isKo ? "복리의 마법" : "Compound Interest",
+            content: isKo
+                ? "수익이 또 수익을 낳는 원리입니다. 시간이 지날수록 눈덩이처럼 불어나요. 일찍 시작하는 게 최고!"
+                : "Earning interest on your interest. It snowballs over time. The earlier you start, the better!"
+        },
+        {
+            title: isKo ? "매수와 매도" : "Buy and Sell",
+            content: isKo
+                ? "매수는 주식을 사는 것, 매도는 주식을 파는 것입니다. 빨간색은 상승, 파란색은 하락을 의미해요."
+                : "Buy means getting shares, Sell means giving them away. Green is Up, Red is Down."
+        }
+    ];
+
+    const rules = [
+        {
+            title: isKo ? "분산 투자" : "Diversification",
+            text: isKo ? "한 바구니에 모든 달걀을 담지 마세요." : "Don't put all your eggs in one basket."
+        },
+        {
+            title: isKo ? "장기 투자" : "Long-term Investing",
+            text: isKo ? "단기적인 출렁임에 흔들리지 마세요." : "Don't let short-term noise shake you out."
+        },
+        {
+            title: isKo ? "여유 자금" : "Emergency Fund",
+            text: isKo ? "당장 써야 할 돈으로 투자하지 마세요." : "Never invest money you need next month."
         }
     ];
 
     container.innerHTML = `
-        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
-            ${topics.map(topic => `
-                <div class="glass-panel beginner-card learn-card">
-                    <h3 style="margin-bottom:10px; color:var(--accent-blue);"><i class="fa-solid fa-book-open"></i> ${topic.title}</h3>
-                    <p style="line-height:1.6; color:var(--text-secondary);">${topic.content}</p>
-                </div>
-            `).join('')}
+        <div style="margin-bottom: 30px;">
+            <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-graduation-cap"></i> ${isKo ? '필수 용어 사전' : 'Core Glossary'}</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px;">
+                ${topics.map(topic => `
+                    <div class="glass-panel beginner-card learn-card" style="margin-bottom:0;">
+                        <h4 style="margin-bottom:8px; color:var(--accent-blue);">${topic.title}</h4>
+                        <p style="font-size:0.95rem; line-height:1.5; color:var(--text-secondary);">${topic.content}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="glass-panel beginner-card" style="background: rgba(59, 130, 246, 0.1);">
+            <h3 style="margin-bottom: 20px; text-align: center;">🛡️ ${isKo ? '투자 3계명' : '3 Rules of Investing'}</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                ${rules.map(rule => `
+                    <div style="text-align:center;">
+                        <h4 style="margin-bottom:5px;">${rule.title}</h4>
+                        <p style="font-size:0.9rem; opacity:0.8;">${rule.text}</p>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3>👣 ${isKo ? '첫 주식 구매 5단계' : '5 Steps to Your First Stock'}</h3>
+            <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <div class="explanation-bubble" style="margin: 0;">1. ${isKo ? '증권사 계좌 만들기' : 'Open a Brokerage Account'}</div>
+                <div class="explanation-bubble" style="margin: 0;">2. ${isKo ? '여유 자금 입금하기' : 'Deposit Funds'}</div>
+                <div class="explanation-bubble" style="margin: 0;">3. ${isKo ? '내가 아는 기업 검색하기 (애플, 삼성 등)' : 'Search for a Familiar Company'}</div>
+                <div class="explanation-bubble" style="margin: 0;">4. ${isKo ? '현재 가격 확인하고 주문 넣기' : 'Check Price and Place Order'}</div>
+                <div class="explanation-bubble" style="margin: 0;">5. ${isKo ? '느긋하게 지켜보기' : 'Wait and Watch'}</div>
+            </div>
         </div>
     `;
 }

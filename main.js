@@ -10,7 +10,22 @@ import { fetchMarketData, searchStocks, fetchStockDetails } from './js/api.js';
 document.addEventListener('DOMContentLoaded', async () => {
     const contentArea = document.getElementById('content-area');
     const navLinks = document.querySelectorAll('.nav-links li');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const appContainer = document.querySelector('.app-container');
     
+    // Sidebar Toggle Logic
+    sidebarToggle.addEventListener('click', () => {
+        appContainer.classList.toggle('sidebar-collapsed');
+        const icon = sidebarToggle.querySelector('i');
+        if (appContainer.classList.contains('sidebar-collapsed')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-indent');
+        } else {
+            icon.classList.remove('fa-indent');
+            icon.classList.add('fa-bars');
+        }
+    });
+
     // Modal Elements
     const newsModal = document.getElementById('news-modal');
     const modalContent = document.getElementById('modal-news-content');
