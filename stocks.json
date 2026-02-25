@@ -131,10 +131,17 @@
         }
     ],
     "news": [
-        { "title": "Fed signals potential rate cuts later this year", "source": "Bloomberg", "sentiment": "positive", "summary": "Inflation cooling down prompts discussion of dovish policy shift." },
-        { "title": "Tech sector faces headwinds from supply chain issues", "source": "Reuters", "sentiment": "negative", "summary": "Chip shortage may persist into Q4, affecting hardware sales." },
-        { "title": "NVIDIA announces new AI chip architecture", "source": "TechCrunch", "sentiment": "positive", "summary": "The 'Rubin' platform promises 2x performance per watt." },
-        { "title": "Oil prices stabilize amidst global uncertainty", "source": "CNBC", "sentiment": "neutral", "summary": "OPEC+ maintains production cuts as demand forecast remains steady." },
-        { "title": "Apple integrates ChatGPT into iOS 18", "source": "The Verge", "sentiment": "positive", "summary": "Major AI overhaul coming to iPhone this fall." }
+        { "title": "NVIDIA Rubun platform promises massive AI growth", "source": "TechCrunch", "sentiment": "positive", "relatedSymbol": "NVDA", "summary": "NVIDIA's next-gen AI architecture is set to dominate the market." },
+        { "title": "Tesla production numbers miss estimates for Q2", "source": "Reuters", "sentiment": "negative", "relatedSymbol": "TSLA", "summary": "Supply chain issues and factory downtime lead to lower delivery numbers." },
+        { "title": "Apple's AI integration sparks new iPhone supercycle", "source": "Bloomberg", "sentiment": "positive", "relatedSymbol": "AAPL", "summary": "Analysts expect record upgrades due to new AI features in iOS." },
+        { "title": "AMD's new server chips to challenge Intel and NVIDIA", "source": "CNBC", "sentiment": "positive", "relatedSymbol": "AMD", "summary": "The EPYC series shows promising benchmarks in data center applications." },
+        { "title": "Microsoft Cloud revenue grows 23% YoY", "source": "The Verge", "sentiment": "positive", "relatedSymbol": "MSFT", "summary": "Azure and AI services continue to drive strong growth for the tech giant." },
+        { "title": "Banking sector hit by regulatory concerns", "source": "Financial Times", "sentiment": "negative", "relatedSymbol": "JPM", "summary": "New capital requirements might impact big banks' lending capabilities." },
+        { "title": "Bitcoin reaches new yearly high on ETF inflows", "source": "CoinDesk", "sentiment": "positive", "relatedSymbol": "BTC", "summary": "Institutional demand for Bitcoin continues to rise after ETF approval." },
+        { "title": "Market indices stabilize after volatile morning", "source": "Yahoo Finance", "sentiment": "neutral", "relatedSymbol": "SPY", "summary": "S&P 500 holds steady as tech gains offset energy losses." },
+        { "title": "Nasdaq 100 sees tech rally led by semiconductors", "source": "MarketWatch", "sentiment": "positive", "relatedSymbol": "QQQ", "summary": "The tech index outperforms broader markets in latest session." },
+        { "title": "Tesla recall affects 100,000 vehicles in China", "source": "Global Times", "sentiment": "negative", "relatedSymbol": "TSLA", "summary": "Software issue in autopilot system leads to mandatory recall." },
+        { "title": "Apple hits record high market cap", "source": "Forbes", "sentiment": "positive", "relatedSymbol": "AAPL", "summary": "The tech giant becomes the first to reach a $3.5 trillion valuation." },
+        { "title": "Federal Reserve maintains interest rates", "source": "WSJ", "sentiment": "neutral", "relatedSymbol": "SPY", "summary": "Central bank waits for more data before committing to rate cuts." }
     ]
 }

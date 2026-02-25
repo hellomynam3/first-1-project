@@ -346,17 +346,32 @@ function renderWatchlist(onStockClick) {
 
 function renderNews(onNewsClick) {
     const container = document.getElementById('news-feed');
-    news.forEach(n => {
+    container.innerHTML = ''; // Clear first
+    
+    // Show only first 5
+    const dashboardNews = news.slice(0, 5);
+
+    dashboardNews.forEach(n => {
+        const relatedStock = stocks.find(s => s.symbol === n.relatedSymbol);
+        const changeHtml = relatedStock ? `
+            <div class="news-stock-badge ${relatedStock.change >= 0 ? 'up' : 'down'}">
+                ${relatedStock.symbol} ${relatedStock.change >= 0 ? '+' : ''}${relatedStock.change}%
+            </div>
+        ` : '';
+
         const card = document.createElement('div');
         card.className = `glass-panel news-card ${n.sentiment}`;
         card.style.cursor = 'pointer';
         card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items: center;">
                 <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">${n.source}</span>
                 <span class="sentiment-badge ${n.sentiment}">${n.sentiment.toUpperCase()}</span>
             </div>
-            <div style="font-weight:bold; font-size:1rem; margin-bottom:5px;">${n.title}</div>
-            <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">${n.summary}</div>
+            <div style="font-weight:bold; font-size:1rem; margin-bottom:8px; line-height:1.4;">${n.title}</div>
+            <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4; margin-bottom:12px;">${n.summary}</div>
+            <div style="margin-top:auto;">
+                ${changeHtml}
+            </div>
         `;
 
         card.addEventListener('click', () => {

@@ -419,6 +419,27 @@ body {
 .sentiment-badge.negative { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
 .sentiment-badge.neutral { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
 
+.news-stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.news-stock-badge.up {
+    color: var(--accent-green);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.news-stock-badge.down {
+    color: var(--accent-red);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
 /* Simulator & Charts */
 .chart-container {
     position: relative;

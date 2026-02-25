@@ -1,4 +1,4 @@
-import { news, appSettings, translations } from './store.js';
+import { news, stocks, appSettings, translations } from './store.js';
 
 export function renderNewsPage(container, onNewsClick) {
     const isKo = appSettings.lang === 'ko';
@@ -36,18 +36,28 @@ export function renderNewsPage(container, onNewsClick) {
         }
 
         filtered.forEach(n => {
+            const relatedStock = stocks.find(s => s.symbol === n.relatedSymbol);
+            const changeHtml = relatedStock ? `
+                <div class="news-stock-badge ${relatedStock.change >= 0 ? 'up' : 'down'}">
+                    ${relatedStock.symbol} ${relatedStock.change >= 0 ? '+' : ''}${relatedStock.change}%
+                </div>
+            ` : '';
+
             const card = document.createElement('div');
             card.className = `glass-panel news-card ${n.sentiment}`;
             card.style.cursor = 'pointer';
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items: center;">
                     <span style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:bold;">${n.source}</span>
                     <span class="sentiment-badge ${n.sentiment}">${n.sentiment.toUpperCase()}</span>
                 </div>
                 <div style="font-weight:bold; font-size:1.1rem; margin-bottom:10px; line-height:1.4;">${n.title}</div>
                 <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; margin-bottom:15px;">${n.summary}</div>
-                <div style="margin-top:auto; font-size:0.8rem; color:var(--accent-blue);">
-                    ${isKo ? '더보기' : 'Read more'} <i class="fa-solid fa-arrow-right"></i>
+                <div style="margin-top:auto; display:flex; justify-content:space-between; align-items: center;">
+                    ${changeHtml}
+                    <div style="font-size:0.8rem; color:var(--accent-blue);">
+                        ${isKo ? '더보기' : 'Read more'} <i class="fa-solid fa-arrow-right"></i>
+                    </div>
                 </div>
             `;
 
