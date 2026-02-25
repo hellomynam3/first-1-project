@@ -67,6 +67,31 @@ export function renderDashboard(container, onStockClick, onNewsClick, onSeeAllNe
         if (onSeeAllNews) onSeeAllNews();
     });
 
+    const btnAddPort = document.getElementById('btn-add-port');
+    if (btnAddPort) {
+        btnAddPort.addEventListener('click', () => {
+            const sym = document.getElementById('port-symbol').value.toUpperCase();
+            const price = parseFloat(document.getElementById('port-price').value);
+            const qty = parseFloat(document.getElementById('port-qty').value);
+            
+            if (sym && !isNaN(price) && !isNaN(qty) && price > 0 && qty > 0) {
+                // Verify symbol exists
+                const exists = stocks.find(st => st.symbol === sym);
+                if (exists || confirm(\`Symbol \${sym} not found in local data. Add anyway?\`)) {
+                    addToPortfolio(sym, price, qty);
+                    renderPortfolio(onStockClick);
+                    
+                    // Clear inputs
+                    document.getElementById('port-symbol').value = '';
+                    document.getElementById('port-price').value = '';
+                    document.getElementById('port-qty').value = '';
+                }
+            } else {
+                alert('Please enter valid symbol, price, and quantity.');
+            }
+        });
+    }
+
     document.getElementById('btn-add-watch').addEventListener('click', () => {
         const s = document.getElementById('watch-symbol').value.toUpperCase();
         if(s) {
