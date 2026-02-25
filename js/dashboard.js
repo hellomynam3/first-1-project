@@ -77,7 +77,7 @@ export function renderDashboard(container, onStockClick, onNewsClick, onSeeAllNe
             if (sym && !isNaN(price) && !isNaN(qty) && price > 0 && qty > 0) {
                 // Verify symbol exists
                 const exists = stocks.find(st => st.symbol === sym);
-                if (exists || confirm(\`Symbol \${sym} not found in local data. Add anyway?\`)) {
+                if (exists || confirm(`Symbol ${sym} not found in local data. Add anyway?`)) {
                     addToPortfolio(sym, price, qty);
                     renderPortfolio(onStockClick);
                     
