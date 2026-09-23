@@ -143,7 +143,7 @@ function renderIndices(onStockClick) {
                     <div class="change ${colorClass}">${sign}${idx.change}%</div>
                 </div>
                 <div style="width:80px; height:50px;">
-                    <canvas id="chart-${idx.symbol}" width="80" height="50"></canvas>
+                    <canvas id="chart-${escapeHTML(idx.symbol)}" width="80" height="50"></canvas>
                 </div>
             </div>
         `;
@@ -303,8 +303,8 @@ function renderWatchlist(onStockClick) {
         card.className = 'glass-panel stock-card';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span class="stock-badge">${s.symbol} ${s.isLive ? '<span>FINNHUB</span>' : ''}</span>
-                <button class="remove-watch-btn" data-symbol="${s.symbol}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                <span class="stock-badge">${escapeHTML(s.symbol)} ${s.isLive ? '<span>FINNHUB</span>' : ''}</span>
+                <button class="remove-watch-btn" data-symbol="${escapeHTML(s.symbol)}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -354,7 +354,7 @@ function renderNews(onNewsClick) {
         const relatedStock = stocks.find(s => s.symbol === n.relatedSymbol);
         const changeHtml = relatedStock ? `
             <div class="news-stock-badge ${relatedStock.change >= 0 ? 'up' : 'down'}">
-                ${relatedStock.symbol} ${relatedStock.change >= 0 ? '+' : ''}${relatedStock.change}%
+                ${escapeHTML(relatedStock.symbol)} ${relatedStock.change >= 0 ? '+' : ''}${relatedStock.change}%
             </div>
         ` : '';
 
