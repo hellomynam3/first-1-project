@@ -44,14 +44,15 @@ export function calculateRSI(prices, period = 14) {
     let avgGain = gains / period;
     let avgLoss = losses / period;
 
-    const rs = avgGain / (avgLoss || 1); // Avoid div by zero
+    if (avgLoss === 0) return avgGain === 0 ? 50 : 100;
+    const rs = avgGain / avgLoss;
     return 100 - (100 / (1 + rs));
 }
 
 // Simple Moving Average (SMA)
 export function calculateSMA(prices, period) {
     if (prices.length < period) return null;
-    const sum = prices.slice(0, period).reduce((a, b) => a + b, 0);
+    const sum = prices.slice(-period).reduce((a, b) => a + b, 0);
     return sum / period;
 }
 

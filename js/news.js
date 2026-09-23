@@ -1,3 +1,4 @@
+import { escapeHTML } from './utils.js';
 import { news, stocks, appSettings, translations } from './store.js';
 
 export function renderNewsPage(container, onNewsClick) {
@@ -44,15 +45,15 @@ export function renderNewsPage(container, onNewsClick) {
             ` : '';
 
             const card = document.createElement('div');
-            card.className = `glass-panel news-card ${n.sentiment}`;
+            card.className = `glass-panel news-card ${escapeHTML(n.sentiment)}`;
             card.style.cursor = 'pointer';
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items: center;">
-                    <span style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:bold;">${n.source}</span>
-                    <span class="sentiment-badge ${n.sentiment}">${n.sentiment.toUpperCase()}</span>
+                    <span style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:bold;">${escapeHTML(n.source)}</span>
+                    <span class="sentiment-badge ${escapeHTML(n.sentiment)}">${n.sentiment.toUpperCase()}</span>
                 </div>
-                <div style="font-weight:bold; font-size:1.1rem; margin-bottom:10px; line-height:1.4;">${n.title}</div>
-                <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; margin-bottom:15px;">${n.summary}</div>
+                <div style="font-weight:bold; font-size:1.1rem; margin-bottom:10px; line-height:1.4;">${escapeHTML(n.title)}</div>
+                <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; margin-bottom:15px;">${escapeHTML(n.summary)}</div>
                 <div style="margin-top:auto; display:flex; justify-content:space-between; align-items: center;">
                     ${changeHtml}
                     <div style="font-size:0.8rem; color:var(--accent-blue);">

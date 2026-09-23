@@ -54,9 +54,13 @@ export function renderBeginner(container) {
 
 function renderTabContent(container) {
     container.innerHTML = '';
+    if ((currentTab === 'market' || currentTab === 'analysis') && stocks.length === 0) {
+        container.textContent = appSettings.lang === 'ko' ? '현재 확인 가능한 시세가 없습니다. 설정에서 데이터 연결을 확인하세요.' : 'No verified market prices available. Check the data connection in Settings.';
+        return;
+    }
     switch(currentTab) {
         case 'market': renderMarketOverview(container); break;
-        case 'analysis': renderAnalysis(container); break;
+        case 'analysis': container.textContent = appSettings.lang === 'ko' ? '기업 정보는 대시보드에서 종목을 선택하면 최신 데이터로 표시됩니다.' : 'Choose a stock on the dashboard for current company details.'; break;
         case 'quiz': renderQuiz(container); break;
         case 'learn': renderLearn(container); break;
     }

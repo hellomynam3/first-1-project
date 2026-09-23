@@ -15,19 +15,18 @@ export function formatNumber(value) {
 }
 
 export function getMarketStatus() {
-    // Simple check for NY Time
-    const now = new Date();
-    const day = now.getDay();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
-    
-    // Convert to simple minutes for comparison
-    const timeInMinutes = hour * 60 + minute;
-    const marketOpen = 9 * 60 + 30;
-    const marketClose = 16 * 60;
-
-    const isOpen = day >= 1 && day <= 5 && timeInMinutes >= marketOpen && timeInMinutes <= marketClose;
-    return isOpen ? { status: 'OPEN', message: 'US Market is Open' } : { status: 'CLOSED', message: 'US Market is Closed' };
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York', weekday: 'short', hour: '2-digit',
+        minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(new Date());
+    const value = type => parts.find(part => part.type === type)?.value;
+    const time = Number(value('hour')) * 60 + Number(value('minute'));
+    const weekday = value('weekday');
+    const isRegularHours = !['Sat', 'Sun'].includes(weekday) && time >= 570 && time < 960;
+    return {
+        status: isRegularHours ? 'OPEN' : 'CLOSED',
+        message: isRegularHours ? 'US regular trading hours (holidays not checked)' : 'Outside US regular trading hours'
+    };
 }
 
 export function getGrade(stock) {
@@ -50,4 +49,10 @@ export function getGrade(stock) {
     if (score >= 70) return 'A';
     if (score >= 50) return 'B';
     return 'C';
+}
+
+export function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
 }

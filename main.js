@@ -1,3 +1,4 @@
+import { escapeHTML } from './js/utils.js';
 import { renderDashboard } from './js/dashboard.js';
 import { renderSimulator } from './js/simulator.js';
 import { renderBeginner } from './js/beginner.js';
@@ -123,10 +124,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Render Results
             if (matches.length > 0) {
                 searchResults.innerHTML = matches.map(s => `
-                    <div class="search-item" data-symbol="${s.symbol}" data-islocal="${s.isLocal}">
+                    <div class="search-item" data-symbol="${escapeHTML(s.symbol)}" data-islocal="${s.isLocal}">
                         <div>
-                            <span class="search-symbol">${s.symbol}</span>
-                            <span class="search-name">${s.name}</span>
+                            <span class="search-symbol">${escapeHTML(s.symbol)}</span>
+                            <span class="search-name">${escapeHTML(s.name)}</span>
                         </div>
                         <div class="search-price">${s.price === 'Click to Load' ? '<i class="fa-solid fa-cloud-arrow-down"></i>' : '$'+s.price}</div>
                     </div>
@@ -146,15 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         } else {
                             // Fetch full details for new stock then show
                             contentArea.innerHTML = '<div style="text-align:center; padding-top:50px;">Fetching Stock Details...</div>';
-                            const newStock = await fetchStockDetails(symbol);
-                            if (newStock) {
-                                // Add to local store temporarily so detailed view works
-                                stocks.push(newStock); 
-                                handleStockClick(symbol);
-                            } else {
-                                alert("Failed to load stock details.");
-                                loadView('dashboard');
-                            }
+                            await handleStockClick(symbol);
                         }
                     });
                 });
@@ -205,7 +198,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderSettings(contentArea, handleSettingsUpdate);
     }
 
-    function handleStockClick(symbol) {
+    async function handleStockClick(symbol) {
+        contentArea.textContent = appSettings.lang === 'ko' ? '종목 정보를 불러오는 중...' : 'Loading stock details...';
+        const detail = await fetchStockDetails(symbol);
+        if (!detail) {
+            contentArea.textContent = appSettings.lang === 'ko' ? '종목 정보를 가져오지 못했습니다. 잠시 후 다시 시도하세요.' : 'Stock details unavailable. Try again later.';
+            return;
+        }
+        const index = stocks.findIndex(item => item.symbol === symbol);
+        if (index >= 0) stocks[index] = detail;
+        else stocks.push(detail);
         loadView('stock-detail', symbol);
     }
 
@@ -216,18 +218,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showNewsModal(news) {
         modalContent.innerHTML = `
             <div style="margin-bottom: 20px;">
-                <span class="sentiment-badge ${news.sentiment}" style="font-size: 0.9rem;">${news.sentiment.toUpperCase()}</span>
-                <span style="color: var(--text-secondary); margin-left: 10px;">${news.source}</span>
+                <span class="sentiment-badge ${escapeHTML(news.sentiment)}" style="font-size: 0.9rem;">${news.sentiment.toUpperCase()}</span>
+                <span style="color: var(--text-secondary); margin-left: 10px;">${escapeHTML(news.source)}</span>
             </div>
-            <h2 style="margin-bottom: 20px; font-size: 1.8rem;">${news.title}</h2>
+            <h2 style="margin-bottom: 20px; font-size: 1.8rem;">${escapeHTML(news.title)}</h2>
             <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">
-                ${news.summary}
+                ${escapeHTML(news.summary)}
                 <br><br>
-                (Full article content would be fetched from the API here.)
+
             </p>
-            <button style="margin-top: 30px; padding: 10px 20px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; cursor: pointer;">
-                Read Full Article <i class="fa-solid fa-external-link-alt"></i>
-            </button>
+            <div style="font-size:0.85rem; color:var(--text-secondary);">Source: ${escapeHTML(news.source)} · ${news.datetime ? new Date(news.datetime * 1000).toLocaleString() : "Date unavailable"}</div>
         `;
         newsModal.classList.remove('hidden');
     }

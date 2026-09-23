@@ -32,7 +32,7 @@ export function renderSettings(container, onUpdate) {
                     <i class="fa-solid fa-key"></i> ${t.apikey_label}
                 </div>
                 <div style="width: 100%;">
-                    <input type="text" id="api-key-input" value="${appSettings.finnhubKey}" placeholder="Paste your Finnhub API key here..." 
+                    <input type="password" id="api-key-input" value="${appSettings.finnhubKey}" placeholder="Paste your Finnhub API key here..." 
                            style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; outline: none;">
                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
                         ${t.apikey_desc}
@@ -45,7 +45,7 @@ export function renderSettings(container, onUpdate) {
                     <i class="fa-solid fa-robot"></i> ${t.gemini_apikey_label}
                 </div>
                 <div style="width: 100%;">
-                    <input type="text" id="gemini-key-input" value="${appSettings.geminiKey}" placeholder="Paste your Gemini API key here..." 
+                    <input type="password" id="gemini-key-input" value="${appSettings.geminiKey}" placeholder="Paste your Gemini API key here..." 
                            style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 10px; border-radius: 8px; outline: none;">
                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
                         ${t.gemini_apikey_desc}
@@ -60,7 +60,7 @@ export function renderSettings(container, onUpdate) {
             </div>
 
             <div style="margin-top: 30px; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
-                Stock AI Master v1.3.0 (Live API Ready)
+                Finnhub-sourced prices · Quotes may be delayed; missing data is not estimated
             </div>
         </div>
 

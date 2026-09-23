@@ -1,5 +1,5 @@
 import { stocks, news, appSettings } from './store.js';
-import { formatCurrency, formatNumber, getGrade } from './utils.js';
+import { formatCurrency, formatNumber, getGrade, escapeHTML } from './utils.js';
 import { runMonteCarlo, calculateRSI, calculateSMA, calculateBollingerBands, generateHistory } from './math.js';
 import { fetchGeminiAnalysis } from './api.js';
 
@@ -9,21 +9,22 @@ export function renderStockDetail(container, symbol, onBack) {
 
     const isUp = stock.change >= 0;
     const colorClass = isUp ? 'text-green' : 'text-red';
-    const grade = getGrade(stock);
+    const grade = [stock.roe, stock.profitMargin, stock.debtRatio].every(Number.isFinite) ? getGrade(stock) : 'N/A';
     const gradeColor = grade === 'S' ? '#d946ef' : grade === 'A' ? '#10b981' : grade === 'B' ? '#f59e0b' : '#ef4444';
 
     // Filter relevant news
-    const stockNews = news.slice(0, 3);
+    const stockNews = stock.companyNews || [];
 
     container.innerHTML = `
+        <div class="glass-panel" style="padding:12px; margin-bottom:12px;">Source: ${stock.source} · Quote time: ${new Date(stock.quotedAt).toLocaleString()} · Price may be delayed</div>
         <button class="back-button" id="btn-back"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
         
         <!-- 1. Top Hero Section: Identity & Price -->
         <div class="glass-panel" style="padding: 24px; margin-bottom: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
                 <div>
-                    <h1 style="font-size: 2.8rem; margin-bottom: 5px;">${stock.symbol}</h1>
-                    <div style="font-size: 1.2rem; color: var(--text-secondary);">${stock.name} • ${stock.sector}</div>
+                    <h1 style="font-size: 2.8rem; margin-bottom: 5px;">${escapeHTML(stock.symbol)}</h1>
+                    <div style="font-size: 1.2rem; color: var(--text-secondary);">${escapeHTML(stock.name)} • ${escapeHTML(stock.sector)}</div>
                 </div>
                 <div style="text-align: right;">
                     <div style="font-size: 3rem; font-weight: bold;">$${stock.price.toFixed(2)}</div>
@@ -38,7 +39,7 @@ export function renderStockDetail(container, symbol, onBack) {
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
             <!-- Price Chart -->
             <div class="glass-panel" style="padding: 20px; min-height: 400px; display:flex; flex-direction:column;">
-                <div class="section-title"><i class="fa-solid fa-chart-area"></i> 30-Day Price Trend</div>
+                <div class="section-title"><i class="fa-solid fa-chart-area"></i> Recent Price History (up to 90 days)</div>
                 <div style="flex:1;">
                     <canvas id="detailChart"></canvas>
                 </div>
@@ -65,15 +66,15 @@ export function renderStockDetail(container, symbol, onBack) {
                         </div>
                         <div style="display:flex; justify-content:space-between;">
                             <span style="color:var(--text-secondary);">ROE</span>
-                            <strong class="text-green">${stock.roe}%</strong>
+                            <strong class="text-green">${stock.roe == null ? 'N/A' : stock.roe + '%'}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between;">
                             <span style="color:var(--text-secondary);">Debt Ratio</span>
-                            <strong class="${stock.debtRatio > 100 ? 'text-red' : ''}">${stock.debtRatio}%</strong>
+                            <strong class="${stock.debtRatio > 100 ? 'text-red' : ''}">${stock.debtRatio == null ? 'N/A' : stock.debtRatio + '%'}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between;">
                             <span style="color:var(--text-secondary);">Dividend</span>
-                            <strong>${stock.dividend || 0}%</strong>
+                            <strong>${stock.dividend == null ? 'N/A' : stock.dividend + '%'}</strong>
                         </div>
                     </div>
                 </div>
@@ -113,7 +114,7 @@ export function renderStockDetail(container, symbol, onBack) {
                 <div class="section-title"><i class="fa-solid fa-brain"></i> AI Insight</div>
                 <div id="ai-analysis-output">
                     <p style="font-size: 1rem; line-height: 1.6; color: #ddd;" id="ai-text">
-                        "${stock.description}"
+                        "${escapeHTML(stock.description)}"
                         <br><br>
                         <span style="color:var(--text-secondary); font-size:0.9rem;">Click the button to the left for a deep quantitative analysis powered by Gemini AI.</span>
                     </p>
@@ -125,7 +126,7 @@ export function renderStockDetail(container, symbol, onBack) {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
             <!-- Monte Carlo -->
             <div class="glass-panel" style="padding: 20px;">
-                <div class="section-title"><i class="fa-solid fa-dice"></i> Monte Carlo Projection (30 Days)</div>
+                <div class="section-title"><i class="fa-solid fa-dice"></i> Illustrative Simulation (30 Days; Not a Forecast)</div>
                 <div style="height:250px;">
                     <canvas id="monteCarloChart"></canvas>
                 </div>
@@ -133,7 +134,7 @@ export function renderStockDetail(container, symbol, onBack) {
 
             <!-- DCA Calc -->
             <div class="glass-panel" style="padding: 20px;">
-                <div class="section-title"><i class="fa-solid fa-calculator"></i> Savings Simulator (DCA)</div>
+                <div class="section-title"><i class="fa-solid fa-calculator"></i> Illustrative Savings Scenario (Assumed 10% Annual Return)</div>
                 <div style="display:grid; gap:15px;">
                     <div style="display:flex; gap:10px;">
                         <div style="flex:1;">
@@ -155,15 +156,15 @@ export function renderStockDetail(container, symbol, onBack) {
         <div class="glass-panel" style="padding: 24px;">
             <div class="section-title"><i class="fa-regular fa-newspaper"></i> Latest Market Intelligence</div>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
-                ${stockNews.map(n => `
+                ${stockNews.length ? stockNews.map(n => `
                     <div style="padding: 15px; background: rgba(255,255,255,0.03); border-radius:12px; border-left: 4px solid var(--accent-blue);">
-                        <div style="font-size: 1rem; font-weight: bold; margin-bottom: 8px; line-height:1.4;">${n.title}</div>
+                        <div style="font-size: 1rem; font-weight: bold; margin-bottom: 8px; line-height:1.4;">${escapeHTML(n.title)}</div>
                         <div style="display:flex; justify-content:space-between; font-size: 0.8rem; color: var(--text-secondary);">
-                            <span>${n.source}</span>
-                            <span class="sentiment-badge ${n.sentiment}">${n.sentiment.toUpperCase()}</span>
+                            <span>${escapeHTML(n.source)}</span>
+                            <span class="sentiment-badge ${escapeHTML(n.sentiment)}">${n.sentiment.toUpperCase()}</span>
                         </div>
                     </div>
-                `).join('')}
+                `).join('') : '<p>No company news available.</p>'}
             </div>
         </div>
     `;
@@ -181,15 +182,16 @@ export function renderStockDetail(container, symbol, onBack) {
 
 function renderDetailChart(stock) {
     const ctx = document.getElementById('detailChart').getContext('2d');
-    const history = generateHistory(stock.price, 30);
+    const history = stock.history || [];
 
+    if (history.length < 2) { ctx.canvas.replaceWith(document.createTextNode('Historical price data is unavailable from the current data plan.')); return; }
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: Array.from({length: history.length}, (_, i) => i),
+            labels: history.map(item => new Date(item.time).toLocaleDateString()),
             datasets: [{
                 label: 'Price',
-                data: history,
+                data: history.map(item => item.price),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 borderWidth: 3,
@@ -214,17 +216,19 @@ function updateTechnicalAnalysis(stock) {
     const history = generateHistory(stock.price, 30);
     
     // RSI
-    const rsi = calculateRSI(history, 14);
+    if (history.length < 21) { ['val-rsi', 'val-sma', 'val-bb', 'val-trend'].forEach(id => document.getElementById(id).textContent = 'N/A'); return; }
+    const prices = history.map(item => item.price);
+    const rsi = calculateRSI(prices, 14);
     const rsiEl = document.getElementById('val-rsi');
     rsiEl.textContent = rsi.toFixed(1);
     rsiEl.style.color = rsi > 70 ? 'var(--accent-red)' : rsi < 30 ? 'var(--accent-green)' : 'white';
 
     // SMA
-    const sma = calculateSMA(history, 20);
+    const sma = calculateSMA(prices, 20);
     document.getElementById('val-sma').textContent = sma ? `$${sma.toFixed(2)}` : '--';
 
     // Bollinger
-    const bb = calculateBollingerBands(history, 20);
+    const bb = calculateBollingerBands(prices, 20);
     const bbEl = document.getElementById('val-bb');
     let bbStatus = "Normal";
     if (bb) {
@@ -256,14 +260,14 @@ async function runAIAnalysis(stock) {
     btn.disabled = true;
 
     try {
-        const prompt = `Act as a professional quantitative analyst. Analyze ${stock.name} (${stock.symbol}). 
-        Price: $${stock.price}, ROE: ${stock.roe}%, Margin: ${stock.profitMargin}%, Debt: ${stock.debtRatio}%. 
+        const prompt = `Act as a professional quantitative analyst. Analyze ${escapeHTML(stock.name)} (${escapeHTML(stock.symbol)}). 
+        Price: ${stock.price} as of ${new Date(stock.quotedAt).toISOString()}. ROE: ${stock.roe ?? 'unavailable'}, Margin: ${stock.profitMargin ?? 'unavailable'}, Debt: ${stock.debtRatio ?? 'unavailable'}. Never invent missing metrics. Explain uncertainties. 
         Provide Headings for: 1. Fundamentals, 2. Risk Check, 3. Rating. Keep it concise.`;
 
         const analysis = await fetchGeminiAnalysis(prompt);
         textDiv.innerHTML = `
             <div style="animation: fadeIn 0.5s ease; color: #f8fafc;">
-                ${analysis.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--accent-blue)">$1</strong>')}
+                ${escapeHTML(analysis).replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--accent-blue)">$1</strong>')}
             </div>
         `;
     } catch (e) {
@@ -280,8 +284,13 @@ async function runAIAnalysis(stock) {
 }
 
 function renderMonteCarlo(stock) {
+    const history = stock.history || [];
     const ctx = document.getElementById('monteCarloChart').getContext('2d');
-    const paths = runMonteCarlo(stock.price, stock.volatility, 30, 12);
+    if (history.length < 21) { ctx.canvas.replaceWith(document.createTextNode('Simulation unavailable without verified historical prices.')); return; }
+    const returns = history.slice(1).map((item, i) => Math.log(item.price / history[i].price));
+    const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+    const volatility = Math.sqrt(returns.reduce((a, b) => a + (b - mean) ** 2, 0) / returns.length);
+    const paths = runMonteCarlo(stock.price, volatility, 30, 12);
     
     const datasets = paths.map(path => ({
         data: path,

@@ -1,11 +1,13 @@
 import { stocks, news, appSettings, translations, portfolio, watchlist, addToPortfolio, removeFromPortfolio, addToWatchlist, removeFromWatchlist } from './store.js';
-import { getMarketStatus, formatCurrency } from './utils.js';
-import { generateHistory } from './math.js';
+import { getMarketStatus, formatCurrency, escapeHTML } from './utils.js';
 
 export function renderDashboard(container, onStockClick, onNewsClick, onSeeAllNews) {
     const t = translations[appSettings.lang];
 
     container.innerHTML = `
+        <div class="glass-panel" style="padding:14px; margin-bottom:18px; border-left:4px solid var(--accent-blue);">
+            ${!appSettings.finnhubKey ? (appSettings.lang === 'ko' ? '실제 시세를 보려면 설정에서 Finnhub API 키를 등록하세요. 예시 가격은 표시하지 않습니다.' : 'Add a Finnhub API key in Settings to load market prices. Demo prices are hidden.') : (stocks.length ? (appSettings.lang === 'ko' ? '출처: Finnhub · 시세가 지연될 수 있습니다.' : 'Source: Finnhub · Quotes may be delayed.') : (appSettings.lang === 'ko' ? '현재 시세를 가져오지 못했습니다.' : 'Market data unavailable.'))}
+        </div>
         <div class="dashboard-header-grid">
             <div class="section-column">
                 <div class="section-title"><i class="fa-solid fa-chart-simple"></i> ${t.indices}</div>
@@ -113,7 +115,7 @@ function updateMarketStatus() {
     const statusEl = document.getElementById('market-status');
     const { status } = getMarketStatus();
     const dotClass = status === 'OPEN' ? 'status-open' : 'status-closed';
-    const msg = status === 'OPEN' ? t.market_open : t.market_closed;
+    const msg = status === 'OPEN' ? (appSettings.lang === 'ko' ? '미국 정규장 시간대 · 휴장일 미확인' : 'US regular trading hours · holidays unchecked') : (appSettings.lang === 'ko' ? '미국 정규장 시간 외' : 'Outside US regular trading hours');
     
     statusEl.innerHTML = `<span class="status-dot ${dotClass}"></span> ${msg}`;
 }
@@ -122,7 +124,8 @@ function renderIndices(onStockClick) {
     const container = document.getElementById('mini-indices');
     const indices = stocks.filter(s => s.type === 'index' || s.type === 'crypto');
 
-    container.innerHTML = ''; // Clear first
+    container.innerHTML = '';
+    if (!indices.length) container.textContent = 'Quotes unavailable.';
     indices.forEach(idx => {
         const isUp = idx.change >= 0;
         const colorClass = isUp ? 'text-green' : 'text-red';
@@ -135,12 +138,12 @@ function renderIndices(onStockClick) {
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:start;">
                 <div>
-                    <h3>${idx.name}</h3>
+                    <h3>${escapeHTML(idx.name)}</h3>
                     <div class="value">${idx.price.toLocaleString()}</div>
                     <div class="change ${colorClass}">${sign}${idx.change}%</div>
                 </div>
                 <div style="width:80px; height:50px;">
-                    <canvas id="chart-${idx.symbol}" width="80" height="50"></canvas>
+                    <canvas id="chart-${escapeHTML(idx.symbol)}" width="80" height="50"></canvas>
                 </div>
             </div>
         `;
@@ -150,22 +153,17 @@ function renderIndices(onStockClick) {
         });
 
         container.appendChild(card);
-        renderSparkline(`chart-${idx.symbol}`, chartColor);
+        // Do not draw a synthetic price chart.
     });
 }
 
 function renderSectors() {
     const container = document.getElementById('sector-performance');
     // For full translation, sector names should also be in dictionary, keeping EN for now as demo
-    const sectors = [
-        { name: 'Technology', change: 1.2 },
-        { name: 'Financial', change: -0.5 },
-        { name: 'Cons. Cyclical', change: -0.2 },
-        { name: 'Healthcare', change: 0.8 },
-        { name: 'Energy', change: 0.1 }
-    ];
+    const sectors = [];
 
     container.innerHTML = ''; // Clear first
+    container.textContent = 'Verified sector data unavailable.';
     sectors.forEach(sec => {
         const isUp = sec.change >= 0;
         const color = isUp ? 'var(--accent-green)' : 'var(--accent-red)';
@@ -215,16 +213,15 @@ function renderPortfolio(onStockClick) {
 
     portfolio.forEach(p => {
         const stock = stocks.find(s => s.symbol === p.symbol);
-        const currentPrice = stock ? stock.price : p.avgPrice; // Fallback
-        const marketVal = currentPrice * p.quantity;
+        const currentPrice = stock ? stock.price : null;
+        const marketVal = currentPrice === null ? 0 : currentPrice * p.quantity;
         const costBasis = p.avgPrice * p.quantity;
-        const pl = marketVal - costBasis;
-        const plPercent = (pl / costBasis) * 100;
+        const pl = currentPrice === null ? null : marketVal - costBasis;
+        const plPercent = pl === null ? null : (pl / costBasis) * 100;
         
-        totalVal += marketVal;
-        totalCost += costBasis;
+        if (currentPrice !== null) { totalVal += marketVal; totalCost += costBasis; }
 
-        const isUp = pl >= 0;
+        const isUp = pl !== null && pl >= 0;
         const colorClass = isUp ? 'text-green' : 'text-red';
 
         const row = document.createElement('div');
@@ -236,14 +233,14 @@ function renderPortfolio(onStockClick) {
         row.style.cursor = 'pointer';
         
         row.innerHTML = `
-            <div style="font-weight:bold;">${p.symbol} <span style="font-size:0.8rem; color:var(--text-secondary);">x${p.quantity}</span></div>
+            <div style="font-weight:bold;">${escapeHTML(p.symbol)} <span style="font-size:0.8rem; color:var(--text-secondary);">x${p.quantity}</span></div>
             <div>$${p.avgPrice.toFixed(2)}</div>
-            <div>$${currentPrice.toFixed(2)}</div>
+            <div>${currentPrice === null ? 'N/A' : '$' + currentPrice.toFixed(2)}</div>
             <div class="${colorClass}">
-                $${Math.abs(pl).toFixed(2)} (${plPercent.toFixed(1)}%)
+                ${pl === null ? 'N/A' : '$' + Math.abs(pl).toFixed(2) + ' (' + plPercent.toFixed(1) + '%)'}
             </div>
             <div style="text-align:right;">
-                <button class="remove-port-btn" data-symbol="${p.symbol}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                <button class="remove-port-btn" data-symbol="${escapeHTML(p.symbol)}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -258,11 +255,13 @@ function renderPortfolio(onStockClick) {
         container.appendChild(row);
     });
 
+    const missingQuotes = portfolio.filter(item => !stocks.some(stock => stock.symbol === item.symbol)).length;
     const totalPL = totalVal - totalCost;
     const totalPLPercent = totalCost > 0 ? (totalPL / totalCost) * 100 : 0;
     const totalColor = totalPL >= 0 ? 'text-green' : 'text-red';
 
     summary.innerHTML = `
+        ${missingQuotes ? (appSettings.lang === 'ko' ? '시세가 없는 보유 종목 ' + missingQuotes + '개는 손익 계산에서 제외되었습니다.<br>' : missingQuotes + ' holdings have no quote and are excluded.<br>') : ''}
         ${t.total_profit}: <span class="${totalColor}">$${totalPL.toFixed(2)} (${totalPLPercent.toFixed(1)}%)</span>
         <div style="font-size:0.9rem; font-weight:normal; color:var(--text-secondary); margin-top:5px;">
             Total Value: $${totalVal.toFixed(2)}
@@ -291,28 +290,28 @@ function renderWatchlist(onStockClick) {
     // For now, we only show matches.
 
     if (myStocks.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-secondary);">Your watchlist is empty.</div>`;
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-secondary);">No verified prices for your watchlist.</div>`;
         return;
     }
 
     myStocks.forEach(s => {
         const isUp = s.change >= 0;
         const colorClass = isUp ? 'text-green' : 'text-red';
-        const ratingColor = s.analystRating.includes('Buy') ? 'text-green' : 'text-secondary';
+        const ratingColor = 'text-secondary';
         
         const card = document.createElement('div');
         card.className = 'glass-panel stock-card';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span class="stock-badge">${s.symbol} ${s.isLive ? '<span class="live-pulse">LIVE</span>' : ''}</span>
-                <button class="remove-watch-btn" data-symbol="${s.symbol}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
+                <span class="stock-badge">${escapeHTML(s.symbol)} ${s.isLive ? '<span>FINNHUB</span>' : ''}</span>
+                <button class="remove-watch-btn" data-symbol="${escapeHTML(s.symbol)}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                 <div>
                     <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">
-                        ${s.name}
+                        ${escapeHTML(s.name)}
                     </div>
                     <div style="font-size:1.6rem; font-weight:bold;">$${s.price.toFixed(2)}</div>
                 </div>
@@ -320,8 +319,8 @@ function renderWatchlist(onStockClick) {
             </div>
             
             <div class="info-chips" style="margin-top:10px;">
-                <div class="chip">${t.mcap}: ${formatCurrency(s.marketCap)}</div>
-                <div class="chip">${t.per}: ${s.peRatio}</div>
+                <div class="chip">${t.mcap}: ${s.marketCap == null ? 'N/A' : formatCurrency(s.marketCap)}</div>
+                <div class="chip">${t.per}: ${s.peRatio ?? 'N/A'}</div>
             </div>
         `;
         
@@ -355,20 +354,20 @@ function renderNews(onNewsClick) {
         const relatedStock = stocks.find(s => s.symbol === n.relatedSymbol);
         const changeHtml = relatedStock ? `
             <div class="news-stock-badge ${relatedStock.change >= 0 ? 'up' : 'down'}">
-                ${relatedStock.symbol} ${relatedStock.change >= 0 ? '+' : ''}${relatedStock.change}%
+                ${escapeHTML(relatedStock.symbol)} ${relatedStock.change >= 0 ? '+' : ''}${relatedStock.change}%
             </div>
         ` : '';
 
         const card = document.createElement('div');
-        card.className = `glass-panel news-card ${n.sentiment}`;
+        card.className = `glass-panel news-card ${escapeHTML(n.sentiment)}`;
         card.style.cursor = 'pointer';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items: center;">
-                <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">${n.source}</span>
-                <span class="sentiment-badge ${n.sentiment}">${n.sentiment.toUpperCase()}</span>
+                <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">${escapeHTML(n.source)}</span>
+                <span class="sentiment-badge ${escapeHTML(n.sentiment)}">${n.sentiment.toUpperCase()}</span>
             </div>
-            <div style="font-weight:bold; font-size:1rem; margin-bottom:8px; line-height:1.4;">${n.title}</div>
-            <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4; margin-bottom:12px;">${n.summary}</div>
+            <div style="font-weight:bold; font-size:1rem; margin-bottom:8px; line-height:1.4;">${escapeHTML(n.title)}</div>
+            <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4; margin-bottom:12px;">${escapeHTML(n.summary)}</div>
             <div style="margin-top:auto;">
                 ${changeHtml}
             </div>
@@ -386,7 +385,7 @@ function renderSparkline(canvasId, color) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const data = generateHistory(100, 20); 
+    const data = []; 
     
     new Chart(ctx, {
         type: 'line',
