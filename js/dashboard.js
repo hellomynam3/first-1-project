@@ -290,20 +290,20 @@ function renderWatchlist(onStockClick) {
     // For now, we only show matches.
 
     if (myStocks.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-secondary);">Your watchlist is empty.</div>`;
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:var(--text-secondary);">No verified prices for your watchlist.</div>`;
         return;
     }
 
     myStocks.forEach(s => {
         const isUp = s.change >= 0;
         const colorClass = isUp ? 'text-green' : 'text-red';
-        const ratingColor = s.analystRating.includes('Buy') ? 'text-green' : 'text-secondary';
+        const ratingColor = 'text-secondary';
         
         const card = document.createElement('div');
         card.className = 'glass-panel stock-card';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span class="stock-badge">${s.symbol} ${s.isLive ? '<span class="live-pulse">LIVE</span>' : ''}</span>
+                <span class="stock-badge">${s.symbol} ${s.isLive ? '<span>FINNHUB</span>' : ''}</span>
                 <button class="remove-watch-btn" data-symbol="${s.symbol}" style="background:none; border:none; color:var(--text-secondary); cursor:pointer;">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -319,8 +319,8 @@ function renderWatchlist(onStockClick) {
             </div>
             
             <div class="info-chips" style="margin-top:10px;">
-                <div class="chip">${t.mcap}: ${formatCurrency(s.marketCap)}</div>
-                <div class="chip">${t.per}: ${s.peRatio}</div>
+                <div class="chip">${t.mcap}: ${s.marketCap == null ? 'N/A' : formatCurrency(s.marketCap)}</div>
+                <div class="chip">${t.per}: ${s.peRatio ?? 'N/A'}</div>
             </div>
         `;
         
