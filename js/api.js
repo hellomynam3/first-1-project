@@ -25,6 +25,7 @@ function buildStock(symbol, quote, profile = {}, metrics = {}) {
     const m = metrics.metric || {};
     return {
         symbol,
+        type: ['SPY', 'QQQ'].includes(symbol) ? 'index' : undefined,
         name: profile.name || symbol,
         sector: profile.finnhubIndustry || 'Unknown',
         price: quote.c,
@@ -140,8 +141,7 @@ export async function fetchGeminiAnalysis(prompt) {
     const apiKey = appSettings.geminiKey;
     if (!apiKey || apiKey.length < 10) throw new Error("Gemini API Key Missing or Invalid");
 
-    // Using v1beta as gemini-1.5-flash is currently more stable there
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
 
     const payload = {
         contents: [{
