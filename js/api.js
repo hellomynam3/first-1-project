@@ -5,58 +5,98 @@ import { appSettings } from './store.js';
 
 const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
 
+async function finnhub(path, params = {}) {
+    const key = appSettings.finnhubKey.trim();
+    if (!key) throw new Error('Market data API key is not configured');
+    const url = new URL(FINNHUB_BASE_URL + path);
+    for (const [name, value] of Object.entries({ ...params, token: key })) {
+        url.searchParams.set(name, String(value));
+    }
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Market data request failed: ' + response.status);
+    return response.json();
+}
+
+function validQuote(quote) {
+    return Number.isFinite(quote?.c) && quote.c > 0 && Number.isFinite(quote?.t) && quote.t > 0;
+}
+
+function buildStock(symbol, quote, profile = {}, metrics = {}) {
+    const m = metrics.metric || {};
+    return {
+        symbol,
+        name: profile.name || symbol,
+        sector: profile.finnhubIndustry || 'Unknown',
+        price: quote.c,
+        change: Number.isFinite(quote.dp) ? quote.dp : 0,
+        high: quote.h,
+        low: quote.l,
+        quotedAt: quote.t * 1000,
+        source: 'Finnhub',
+        isLive: true,
+        marketCap: Number.isFinite(profile.marketCapitalization) ? profile.marketCapitalization * 1000000 : null,
+        peRatio: m.peTTM ?? null,
+        roe: m.roeTTM ?? null,
+        profitMargin: m.netProfitMarginTTM ?? null,
+        debtRatio: m.totalDebtToEquityAnnual ?? null,
+        dividend: m.dividendYieldIndicatedAnnual ?? null,
+        volatility: null,
+        description: profile.name ? profile.name + ' · ' + (profile.finnhubIndustry || 'Industry unavailable') : '',
+        analystRating: null
+    };
+}
+
 export async function fetchMarketData() {
-    // 1. Load basic info from local JSON first
-    let localData = { stocks: [], news: [] };
+    if (!appSettings.finnhubKey.trim()) return { stocks: [], news: [], error: 'API_KEY_MISSING' };
+    const symbols = ['AAPL', 'TSLA', 'NVDA', 'AMD', 'MSFT', 'JPM', 'SPY', 'QQQ'];
+    const results = await Promise.allSettled(symbols.map(async symbol => {
+        const quote = await finnhub('/quote', { symbol });
+        return validQuote(quote) ? buildStock(symbol, quote) : null;
+    }));
+    const stocks = results.filter(result => result.status === 'fulfilled' && result.value).map(result => result.value);
+    let news = [];
     try {
-        const response = await fetch('./stocks.json');
-        localData = await response.json();
-    } catch (e) {
-        console.error("Local data failed", e);
-    }
-
-    // 2. If API Key exists, try to get LIVE prices for the watchlist
-    const apiKey = appSettings.finnhubKey;
-    if (apiKey && apiKey.trim() !== "") {
-        console.log("Fetching Live Data from Finnhub...");
-        try {
-            const pricePromises = localData.stocks.map(async (stock) => {
-                if (stock.type === 'crypto') return stock; // Skip crypto for now
-                const res = await fetch(`${FINNHUB_BASE_URL}/quote?symbol=${stock.symbol}&token=${apiKey}`);
-                const quote = await res.json();
-                
-                if (quote.c) {
-                    return {
-                        ...stock,
-                        price: quote.c,
-                        change: parseFloat(quote.dp.toFixed(2)),
-                        high: quote.h,
-                        low: quote.l,
-                        isLive: true
-                    };
-                }
-                return stock;
-            });
-
-            localData.stocks = await Promise.all(pricePromises);
-            
-            const newsRes = await fetch(`${FINNHUB_BASE_URL}/news?category=general&token=${apiKey}`);
-            const liveNews = await newsRes.json();
-            if (Array.isArray(liveNews) && liveNews.length > 0) {
-                localData.news = liveNews.slice(0, 5).map(n => ({
-                    title: n.headline,
-                    source: n.source,
-                    sentiment: "neutral",
-                    summary: n.summary,
-                    url: n.url
-                }));
-            }
-        } catch (error) {
-            console.error('Finnhub Fetch Failed:', error);
+        const items = await finnhub('/news', { category: 'general' });
+        if (Array.isArray(items)) {
+            news = items.slice(0, 15).filter(item => item.headline && item.url).map(item => ({
+                title: item.headline, source: item.source || 'Unknown', summary: item.summary || '',
+                url: item.url, datetime: item.datetime, sentiment: 'neutral'
+            }));
         }
+    } catch (error) {
+        console.warn('News unavailable', error);
     }
+    return { stocks, news, error: stocks.length ? null : 'MARKET_DATA_UNAVAILABLE' };
+}
 
-    return localData;
+export async function fetchHistoricalPrices(symbol, days = 90) {
+    const to = Math.floor(Date.now() / 1000);
+    const from = to - days * 86400;
+    try {
+        const data = await finnhub('/stock/candle', { symbol, resolution: 'D', from, to });
+        if (data.s !== 'ok' || !Array.isArray(data.c) || !Array.isArray(data.t)) return [];
+        return data.c.map((close, index) => ({ price: close, time: data.t[index] * 1000 }))
+            .filter(item => Number.isFinite(item.price) && Number.isFinite(item.time));
+    } catch (error) {
+        console.warn('Price history unavailable', error);
+        return [];
+    }
+}
+
+export async function fetchCompanyNews(symbol) {
+    const to = new Date();
+    const from = new Date(to.getTime() - 14 * 86400000);
+    const date = value => value.toISOString().slice(0, 10);
+    try {
+        const items = await finnhub('/company-news', { symbol, from: date(from), to: date(to) });
+        return Array.isArray(items) ? items.slice(0, 6).filter(item => item.headline && item.url).map(item => ({
+            title: item.headline, source: item.source || 'Unknown', summary: item.summary || '',
+            url: item.url, datetime: item.datetime, sentiment: 'neutral', relatedSymbol: symbol
+        })) : [];
+    } catch (error) {
+        console.warn('Company news unavailable', error);
+        return [];
+    }
 }
 
 // NEW: Global Stock Search
@@ -67,8 +107,8 @@ export async function searchStocks(query) {
     if (!apiKey || apiKey.trim() === "") return null;
 
     try {
-        const res = await fetch(`${FINNHUB_BASE_URL}/search?q=${query}&token=${apiKey}`);
-        const data = await res.json();
+        const res = await finnhub('/search', { q: query });
+        const data = res;
         return data.result; // Returns array of { description, displaySymbol, symbol, type }
     } catch (error) {
         console.error("Search failed:", error);
@@ -78,41 +118,19 @@ export async function searchStocks(query) {
 
 // NEW: Fetch Detailed Info for a specific new stock found via search
 export async function fetchStockDetails(symbol) {
-    const apiKey = appSettings.finnhubKey;
-    if (!apiKey) return null;
-
+    if (!appSettings.finnhubKey.trim()) return null;
     try {
-        // Parallel fetch: Quote + Profile
-        const [quoteRes, profileRes] = await Promise.all([
-            fetch(`${FINNHUB_BASE_URL}/quote?symbol=${symbol}&token=${apiKey}`),
-            fetch(`${FINNHUB_BASE_URL}/stock/profile2?symbol=${symbol}&token=${apiKey}`)
+        const [quote, profile, metrics, history, companyNews] = await Promise.all([
+            finnhub('/quote', { symbol }),
+            finnhub('/stock/profile2', { symbol }).catch(() => ({})),
+            finnhub('/stock/metric', { symbol, metric: 'all' }).catch(() => ({})),
+            fetchHistoricalPrices(symbol),
+            fetchCompanyNews(symbol)
         ]);
-
-        const quote = await quoteRes.json();
-        const profile = await profileRes.json();
-
-        if (!quote.c) return null;
-
-        return {
-            symbol: symbol,
-            name: profile.name || symbol,
-            price: quote.c,
-            change: parseFloat(quote.dp?.toFixed(2) || 0),
-            volatility: 0.02, // Default fallback
-            roe: 10, // Default fallback
-            debtRatio: 50, // Default fallback
-            profitMargin: 10, // Default fallback
-            sentiment: 'neutral',
-            sector: profile.finnhubIndustry || 'Unknown',
-            marketCap: (profile.marketCapitalization || 0) * 1000000, // Finnhub returns in millions
-            peRatio: 20, // Not always available in free tier
-            dividend: 0,
-            analystRating: 'Hold',
-            description: `${profile.name} operates in the ${profile.finnhubIndustry} industry.`,
-            isLive: true
-        };
-    } catch (e) {
-        console.error("Detail fetch failed", e);
+        if (!validQuote(quote)) return null;
+        return { ...buildStock(symbol, quote, profile, metrics), history, companyNews };
+    } catch (error) {
+        console.error('Stock detail unavailable', error);
         return null;
     }
 }
