@@ -23,7 +23,7 @@ export function renderStockDetail(container, symbol, onBack) {
         <div class="glass-panel" style="padding: 24px; margin-bottom: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
                 <div>
-                    <h1 style="font-size: 2.8rem; margin-bottom: 5px;">${stock.symbol}</h1>
+                    <h1 style="font-size: 2.8rem; margin-bottom: 5px;">${escapeHTML(stock.symbol)}</h1>
                     <div style="font-size: 1.2rem; color: var(--text-secondary);">${escapeHTML(stock.name)} • ${escapeHTML(stock.sector)}</div>
                 </div>
                 <div style="text-align: right;">
@@ -39,7 +39,7 @@ export function renderStockDetail(container, symbol, onBack) {
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
             <!-- Price Chart -->
             <div class="glass-panel" style="padding: 20px; min-height: 400px; display:flex; flex-direction:column;">
-                <div class="section-title"><i class="fa-solid fa-chart-area"></i> 30-Day Price Trend</div>
+                <div class="section-title"><i class="fa-solid fa-chart-area"></i> Recent Price History (up to 90 days)</div>
                 <div style="flex:1;">
                     <canvas id="detailChart"></canvas>
                 </div>
@@ -260,7 +260,7 @@ async function runAIAnalysis(stock) {
     btn.disabled = true;
 
     try {
-        const prompt = `Act as a professional quantitative analyst. Analyze ${escapeHTML(stock.name)} (${stock.symbol}). 
+        const prompt = `Act as a professional quantitative analyst. Analyze ${escapeHTML(stock.name)} (${escapeHTML(stock.symbol)}). 
         Price: ${stock.price} as of ${new Date(stock.quotedAt).toISOString()}. ROE: ${stock.roe ?? 'unavailable'}, Margin: ${stock.profitMargin ?? 'unavailable'}, Debt: ${stock.debtRatio ?? 'unavailable'}. Never invent missing metrics. Explain uncertainties. 
         Provide Headings for: 1. Fundamentals, 2. Risk Check, 3. Rating. Keep it concise.`;
 
